@@ -1,0 +1,34 @@
+name: Refresh model prices
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Regenerate data/prices.json from LiteLLM's pricing catalogue
+        run: node scripts/normalise-prices.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name "fernai-price-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet -- data/prices.json; then
+            echo "No price changes."
+          else
+            git add data/prices.json
+            git commit -m "chore: refresh model prices"
+            git push
+          fi

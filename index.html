@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI ROI Calculator — estimate the return on AI adoption</title>
+<meta name="description" content="Estimate the monthly return on adopting AI tools for your team, and compare live API token costs across Claude, GPT, Gemini, Grok and Llama. Free calculator by FernAI.">
+<meta property="og:title" content="AI ROI Calculator">
+<meta property="og:description" content="Estimate the monthly return on adopting AI tools for your team, and compare live token costs across frontier models.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b1120'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%23dc2626' font-family='Georgia,serif'%3Ef%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div class="brand">FernAI &middot; <a href="https://fernai.uk" target="_blank" rel="noopener">fernai.uk</a></div>
+    <button class="theme-toggle" id="theme-toggle" type="button">Light mode</button>
+  </header>
+
+  <h1 class="title">AI ROI Calculator</h1>
+  <p class="subtitle">
+    Estimate the monthly value of AI-assisted work against what it actually costs
+    to run, using live API token pricing for Claude, GPT, Gemini, Grok and Llama.
+    Adjust the numbers on the left to match your team.
+  </p>
+
+  <div class="layout">
+    <!-- INPUTS -->
+    <div class="panel">
+      <h2 class="panel-head">Your team</h2>
+      <div class="panel-rule"></div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="team-size">Team size <span class="val" id="team-size-val">10</span></label>
+          <input type="number" id="team-size" min="1" max="5000" value="10">
+        </div>
+        <div class="field">
+          <label for="hourly-cost">Hourly cost <span class="val" id="hourly-cost-val">£45</span></label>
+          <input type="number" id="hourly-cost" min="1" step="1" value="45">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="currency">Currency</label>
+        <select id="currency">
+          <option value="GBP" selected>£ GBP</option>
+          <option value="USD">$ USD</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="hours-week">Hours/week per person on AI-assisted tasks <span class="val" id="hours-week-val">8</span></label>
+        <input type="range" id="hours-week" min="1" max="40" step="0.5" value="8">
+      </div>
+
+      <div class="field">
+        <label for="efficiency">Time saved on those tasks <span class="val" id="efficiency-val">30%</span></label>
+        <input type="range" id="efficiency" min="5" max="80" step="5" value="30">
+      </div>
+
+      <div class="field-group-head">AI usage</div>
+
+      <div class="field">
+        <label for="model">Model</label>
+        <select id="model"></select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="input-tokens">Avg input tokens / task</label>
+          <input type="number" id="input-tokens" min="0" step="100" value="3000">
+        </div>
+        <div class="field">
+          <label for="output-tokens">Avg output tokens / task</label>
+          <input type="number" id="output-tokens" min="0" step="100" value="800">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="interactions-week">AI tasks / person / week <span class="val" id="interactions-week-val">25</span></label>
+        <input type="range" id="interactions-week" min="1" max="200" step="1" value="25">
+      </div>
+
+      <div class="field">
+        <label for="seat-cost">Extra flat monthly cost (seats, subscriptions)</label>
+        <input type="number" id="seat-cost" min="0" step="10" value="0">
+      </div>
+
+      <p class="panel-note">All figures are estimates for illustration, not a quote. Token prices are list prices with no volume discount.</p>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-col">
+      <div class="panel">
+        <h2 class="panel-head">Estimated monthly outcome</h2>
+        <div class="panel-rule"></div>
+
+        <div class="stat-row">
+          <div class="stat-tile hero" id="net-value-tile">
+            <div>
+              <div class="stat-label">Net monthly value</div>
+              <div class="stat-figure" id="net-value">—</div>
+            </div>
+            <div class="stat-sub" id="roi-pct">ROI —</div>
+          </div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-tile">
+            <div class="stat-label">Value of time saved</div>
+            <div class="stat-figure value" id="monthly-value">—</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label">Monthly AI cost</div>
+            <div class="stat-figure cost" id="monthly-cost">—</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-label">Hours saved / month</div>
+            <div class="stat-figure" id="hours-saved">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-head">Monthly AI cost by model</h2>
+        <div class="panel-rule"></div>
+        <p class="panel-note">Same task volume as above, priced across each model. Sorted cheapest first.</p>
+        <div class="legend-row">
+          <span><span class="legend-swatch" style="background:var(--data-cost)"></span>Flagship tier</span>
+          <span><span class="legend-swatch" style="background:var(--data-cost-tint)"></span>Efficient tier</span>
+        </div>
+        <div class="bar-list" id="bar-list">
+          <div class="loading-note">Loading live pricing…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span id="price-source">Pricing source loading…</span>
+    <span>Built by <a href="https://fernai.uk" target="_blank" rel="noopener">FernAI</a> — AI ROI measurement for teams that need the evidence, not just the vibe.</span>
+  </div>
+
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>

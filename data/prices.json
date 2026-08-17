@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-08-17T13:39:38.073Z",
+  "source": "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json",
+  "sourceProject": "BerriAI/litellm",
+  "notes": "Prices are USD per 1M tokens, list price, no volume/committed-use discounts. Meta doesn't sell first-party per-token Llama API access, so its entries are priced via a third-party inference host (noted per model). Refreshed weekly by GitHub Actions from the source above — treat as indicative, not a live quote.",
+  "models": [
+    {
+      "id": "claude-opus-5",
+      "vendor": "Anthropic",
+      "tier": "flagship",
+      "label": "Claude Opus 5",
+      "hostNote": null,
+      "inputPer1mUsd": 5,
+      "outputPer1mUsd": 25
+    },
+    {
+      "id": "claude-haiku-4-5",
+      "vendor": "Anthropic",
+      "tier": "efficient",
+      "label": "Claude Haiku 4.5",
+      "hostNote": null,
+      "inputPer1mUsd": 1,
+      "outputPer1mUsd": 5
+    },
+    {
+      "id": "gpt-5.2",
+      "vendor": "OpenAI",
+      "tier": "flagship",
+      "label": "GPT-5.2",
+      "hostNote": null,
+      "inputPer1mUsd": 1.75,
+      "outputPer1mUsd": 14
+    },
+    {
+      "id": "gpt-5-mini",
+      "vendor": "OpenAI",
+      "tier": "efficient",
+      "label": "GPT-5 mini",
+      "hostNote": null,
+      "inputPer1mUsd": 0.25,
+      "outputPer1mUsd": 2
+    },
+    {
+      "id": "gemini-3-pro-preview",
+      "vendor": "Google",
+      "tier": "flagship",
+      "label": "Gemini 3 Pro",
+      "hostNote": null,
+      "inputPer1mUsd": 2,
+      "outputPer1mUsd": 12
+    },
+    {
+      "id": "gemini-3.1-flash-lite",
+      "vendor": "Google",
+      "tier": "efficient",
+      "label": "Gemini 3.1 Flash Lite",
+      "hostNote": null,
+      "inputPer1mUsd": 0.25,
+      "outputPer1mUsd": 1.5
+    },
+    {
+      "id": "grok-4.5",
+      "vendor": "xAI",
+      "tier": "flagship",
+      "label": "Grok 4.5",
+      "hostNote": null,
+      "inputPer1mUsd": 2,
+      "outputPer1mUsd": 6
+    },
+    {
+      "id": "grok-4-1-fast",
+      "vendor": "xAI",
+      "tier": "efficient",
+      "label": "Grok 4.1 Fast",
+      "hostNote": null,
+      "inputPer1mUsd": 0.2,
+      "outputPer1mUsd": 0.5
+    },
+    {
+      "id": "llama-4-maverick",
+      "vendor": "Meta",
+      "tier": "flagship",
+      "label": "Llama 4 Maverick",
+      "hostNote": "via Groq",
+      "inputPer1mUsd": 0.2,
+      "outputPer1mUsd": 0.6
+    },
+    {
+      "id": "llama-4-scout",
+      "vendor": "Meta",
+      "tier": "efficient",
+      "label": "Llama 4 Scout",
+      "hostNote": "via Groq",
+      "inputPer1mUsd": 0.11,
+      "outputPer1mUsd": 0.34
+    }
+  ]
+}
