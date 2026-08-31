@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-24T06:38:21.894Z",
+  "generatedAt": "2026-08-31T12:13:40.237Z",
   "source": "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json",
   "sourceProject": "BerriAI/litellm",
   "notes": "Prices are USD per 1M tokens, list price, no volume/committed-use discounts. Meta doesn't sell first-party per-token Llama API access, so its entries are priced via a third-party inference host (noted per model). Refreshed weekly by GitHub Actions from the source above — treat as indicative, not a live quote.",
@@ -73,8 +73,8 @@
       "tier": "efficient",
       "label": "Grok 4.1 Fast",
       "hostNote": null,
-      "inputPer1mUsd": 0.2,
-      "outputPer1mUsd": 0.5
+      "inputPer1mUsd": 1.25,
+      "outputPer1mUsd": 2.5
     },
     {
       "id": "llama-4-maverick",
