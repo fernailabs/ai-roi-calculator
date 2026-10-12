@@ -3,7 +3,7 @@
 # data/assumptions.json, the same file the web page uses. The static site
 # itself is hosted elsewhere; a copy is included only so a private preview
 # deployment can serve it for testing.
-FROM node:22-slim
+FROM node:26-slim
 
 ENV NODE_ENV=production
 WORKDIR /app
