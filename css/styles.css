@@ -58,6 +58,9 @@
 }
 
 * { box-sizing: border-box; }
+/* The hidden attribute always wins over a component's own display rule
+   (e.g. .legend-row is display: flex). */
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -398,6 +401,60 @@ fieldset:disabled .task { opacity: 0.45; }
 :root[data-embed] .appfoot { display: none; }
 :root[data-embed] body { min-height: 0; }
 :root[data-embed] .main { padding: 24px 0 32px; }
+
+/* ---- panel embed (?embed=panel) ---------------------------------------------
+   For host pages that strip scripts and so can't resize the frame: the host
+   gives the frame a fixed height (85vh in the README snippet) and the
+   calculator fits inside it. The host page supplies the title, so the page
+   heading goes. Wide frames get two independently scrolling columns, inputs
+   (with the assistant at the top) beside results, so results stay in view.
+   Narrow frames scroll as one page, with the headline figure pinned on top.
+   ------------------------------------------------------------------------- */
+.mini-summary { display: none; }
+
+:root[data-embed-panel] .eyebrow,
+:root[data-embed-panel] .screen-title,
+:root[data-embed-panel] .screen-sub,
+:root[data-embed-panel] .rule-2 { display: none; }
+:root[data-embed-panel] .main { padding: 16px 0 24px; }
+:root[data-embed-panel] .inputs-col .assistant { margin-bottom: 20px; }
+:root[data-embed-panel] .inputs-col .assistant-in { grid-template-columns: 1fr; padding: 22px 22px; gap: 14px; }
+:root[data-embed-panel] .results .source-line { margin-top: 32px; }
+
+@media (max-width: 899px) {
+  :root[data-embed-panel] .mini-summary {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px;
+    position: sticky; top: 0; z-index: 5;
+    margin: -16px 0 16px; padding: 10px 14px;
+    background: var(--app-nav); color: var(--app-nav-ink);
+  }
+  :root[data-embed-panel] .mini-summary .micro { color: var(--app-nav-muted); flex-basis: 100%; }
+  :root[data-embed-panel] .mini-summary strong { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  :root[data-embed-panel] .mini-summary.neg strong { color: var(--app-nav-ink); }
+  :root[data-embed-panel] .mini-summary:not(.neg) strong { color: #f4795e; }
+  :root[data-embed-panel] .mini-jump {
+    margin-left: auto; background: transparent; border: 1px solid var(--app-nav-line);
+    color: var(--app-nav-ink); font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 7px 10px; cursor: pointer;
+  }
+  :root[data-embed-panel] .layout { gap: 28px; }
+  :root[data-embed-panel] #outcome-head { scroll-margin-top: 80px; }
+}
+
+@media (min-width: 900px) {
+  :root[data-embed-panel],
+  :root[data-embed-panel] body { height: 100%; overflow: hidden; }
+  :root[data-embed-panel] body { display: flex; flex-direction: column; min-height: 0; }
+  :root[data-embed-panel] .main { flex: 1; min-height: 0; display: flex; padding: 16px 0 0; }
+  :root[data-embed-panel] .main > .container { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  :root[data-embed-panel] .layout { flex: 1; min-height: 0; align-items: stretch; gap: 32px; }
+  /* position: relative so absolutely positioned bits (screen-reader-only
+     labels) belong to their scrolling column, not the frame. */
+  :root[data-embed-panel] .inputs-col,
+  :root[data-embed-panel] .layout > .results { position: relative; min-height: 0; overflow-y: auto; padding-bottom: 24px; }
+  :root[data-embed-panel] .layout > .results { padding-right: 4px; }
+  :root[data-embed-panel] .inputs .note { margin-bottom: 4px; }
+}
 
 /* ===========================================================================
    Brand invariants, enforced once at the foot of the cascade.

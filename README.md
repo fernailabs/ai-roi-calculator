@@ -48,22 +48,29 @@ wordmark. Light is the default theme; dark is a toggle. Copy is British English.
 If the brand tokens change there, copy the `:root` and `[data-theme="dark"]`
 blocks at the top of `css/styles.css` across.
 
-## Linking from fernai.co.uk (recommended)
+## Embedding on fernai.co.uk
 
-fernai.co.uk's managed WordPress strips `<script>` tags, so an embedded frame
-can't resize to fit the calculator and shows empty space or cuts it off.
-Instead, the WordPress page introduces the calculator and links to it
-full-page, where it works on every screen size. Paste into a Custom HTML
-block:
+fernai.co.uk's managed WordPress strips `<script>` tags, so the frame can't be
+resized to fit the calculator. Use the **panel** embed instead: the frame has
+a fixed height relative to the visitor's screen, and the calculator fits
+inside it. On wide screens the inputs and the results scroll side by side, so
+the results stay in view; on phones it scrolls as one column, with the
+headline figure pinned at the top. Paste into a Custom HTML block:
 
 ```html
-<p><a href="https://roi.fernai.co.uk/"
-      style="display:inline-block;background:#ec3013;color:#fff;padding:14px 22px;
-             font-weight:700;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none">
-  Open the AI ROI calculator &rarr;</a></p>
+<iframe src="https://fernailabs.github.io/ai-roi-calculator/?embed=panel"
+        title="AI ROI Calculator"
+        style="width:100%;height:85vh;min-height:600px;border:0"></iframe>
 ```
 
-### Serving it at roi.fernai.co.uk
+The page's own title goes in panel mode, so give the WordPress page a heading
+and a short intro above the frame (search engines don't credit text inside a
+frame to the page). Choose a full-width page template if the theme has one.
+
+### Optional: a full-page address at roi.fernai.co.uk
+
+The calculator also works as a standalone page. To serve it at
+`roi.fernai.co.uk` (and link to it, or embed from there):
 
 1. In the DNS for fernai.co.uk, add a `CNAME` record: name `roi`, value
    `fernailabs.github.io`.
@@ -73,20 +80,21 @@ block:
 3. The assistant service already allows `https://roi.fernai.co.uk`.
 
 GitHub then redirects `fernailabs.github.io/ai-roi-calculator/` to the new
-address, so existing links keep working. Until the domain is set up, link to
-`https://fernailabs.github.io/ai-roi-calculator/` instead.
+address, so existing links and embeds keep working.
 
 ## Embedding in other sites
 
-Where the host page can run a script, the calculator can also be embedded in
-an iframe. Query parameters:
+Where the host page can run a script, the frame can instead resize to fit
+the calculator exactly, so the whole calculator is part of the page with no
+inner scrolling. Query parameters:
 
 | Parameter     | Effect                                                          |
 |---------------|-----------------------------------------------------------------|
-| `embed=1`     | Hides the header bar and footer (the host page supplies those). |
+| `embed=1`     | Hides the header bar and footer (the host page supplies those); sends its height to the host page. |
+| `embed=panel` | For fixed-height frames: also hides the page title, and fits the calculator inside the frame (see above). |
 | `theme=light` / `theme=dark` | Pins the theme, overriding the visitor's saved choice. |
 
-In embed mode the page posts its content height to the parent so the frame
+With `embed=1` the page posts its content height to the parent so the frame
 can grow to fit without an inner scrollbar. Paste this into the website
 (e.g. a WordPress *Custom HTML* block):
 
@@ -110,10 +118,9 @@ visitor clicking through leaves the iframe rather than loading the site inside i
 
 The "Describe your team" assistant works inside the iframe without changes:
 its requests come from the calculator's own address (`fernailabs.github.io`),
-which the assistant service already allows. If you serve the calculator from
-a different address, such as a `roi.fernai.co.uk` subdomain, redeploy the
-service with that address added:
-`ALLOWED_ORIGINS=https://roi.fernai.co.uk,https://fernailabs.github.io ./server/deploy.sh`.
+which the assistant service already allows, as it does `roi.fernai.co.uk`. If
+you serve the calculator from any other address, redeploy the service with it
+added to `ALLOWED_ORIGINS` (see server/README.md).
 
 ## Updating the model list
 

@@ -35,7 +35,12 @@
       try { theme = localStorage.getItem("fernai-roi-calc-theme"); } catch (_) { theme = null; }
     }
     if (theme === "dark") root.setAttribute("data-theme", "dark");
-    if (params.get("embed") === "1") root.setAttribute("data-embed", "");
+    // ?embed=1: frame resized by a script on the host page (README).
+    // ?embed=panel: fixed-height frame for hosts that strip scripts; the
+    // calculator scrolls inside it instead.
+    var embed = params.get("embed");
+    if (embed === "1" || embed === "panel") root.setAttribute("data-embed", "");
+    if (embed === "panel") root.setAttribute("data-embed-panel", "");
   })();
 </script>
 </head>
@@ -67,6 +72,14 @@
       Adjust the inputs to match your team.
     </p>
     <div class="rule-2"></div>
+
+    <!-- Panel embeds on narrow screens: keeps the headline figure in view
+         while the visitor scrolls the inputs inside the frame. -->
+    <div class="mini-summary" id="mini-summary">
+      <span class="micro">Monthly benefit after AI costs</span>
+      <strong id="mini-net">—</strong>
+      <button type="button" class="mini-jump" id="mini-jump">See results ↓</button>
+    </div>
 
     <section class="assistant" id="assistant" aria-labelledby="assistant-head" hidden>
       <div class="assistant-in">

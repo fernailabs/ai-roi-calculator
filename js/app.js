@@ -5,6 +5,7 @@
   const CURRENCY_SYMBOL = { GBP: "£", USD: "$" };
   const LOCALE = "en-GB";
   const EMBEDDED = document.documentElement.hasAttribute("data-embed");
+  const PANEL = document.documentElement.hasAttribute("data-embed-panel");
 
   const STORAGE_KEY = "fernai-roi-calc-inputs-v2";
   const THEME_KEY = "fernai-roi-calc-theme";
@@ -63,6 +64,9 @@
     assistantSummary: $("assistant-summary"),
     assistantReasons: $("assistant-reasons"),
     turnstile: $("turnstile"),
+    miniSummary: $("mini-summary"),
+    miniNet: $("mini-net"),
+    miniJump: $("mini-jump"),
   };
 
   let priceData = null;
@@ -202,6 +206,8 @@
     els.netValue.textContent = fmtMoney(r.netValue, inputs.currency);
     els.roiPct.textContent = describeReturn(r, inputs.currency);
     els.netValueTile.classList.toggle("roi-neg", r.netValue < 0);
+    els.miniNet.textContent = els.netValue.textContent;
+    els.miniSummary.classList.toggle("neg", r.netValue < 0);
     els.monthlyValue.textContent = fmtMoney(r.monthlyValue, inputs.currency);
     els.monthlyCost.textContent = fmtMoney(r.monthlyCost, inputs.currency);
     els.monthlyCostHint.textContent = inputs.access === "api" ? "Usage plus other costs" : "Seats plus other costs";
@@ -399,7 +405,8 @@
   // In an iframe, tell the host page how tall the content is so it can size
   // the frame without an inner scrollbar. See README "Embedding".
   function initEmbedResize() {
-    if (!EMBEDDED || window.parent === window) return;
+    // A panel embed has a fixed-height frame and scrolls inside it instead.
+    if (!EMBEDDED || PANEL || window.parent === window) return;
     let last = 0;
     const post = () => {
       // The body's own height, not the document's scrollHeight: scrollHeight
@@ -413,6 +420,22 @@
     if ("ResizeObserver" in window) new ResizeObserver(post).observe(document.body);
     window.addEventListener("load", post);
     post();
+  }
+
+  // Panel embed: put the assistant at the top of the inputs column, so both
+  // columns can scroll inside a fixed-height frame, and the pricing note at
+  // the end of the results.
+  function initPanel() {
+    if (!PANEL) return;
+    const inputs = document.querySelector(".layout > .inputs");
+    const col = document.createElement("div");
+    col.className = "inputs-col";
+    inputs.parentNode.insertBefore(col, inputs);
+    col.append(els.assistant, inputs);
+    document.querySelector(".layout > .results").appendChild(els.priceSource);
+    els.miniJump.addEventListener("click", () => {
+      $("outcome-head").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   // ---- assistant ("Describe your team") --------------------------------------------
@@ -522,6 +545,7 @@
   async function init() {
     if (els.year) els.year.textContent = new Date().getFullYear();
     initTheme();
+    initPanel();
     initEmbedResize();
     try {
       const [prices, assume] = await Promise.all([
