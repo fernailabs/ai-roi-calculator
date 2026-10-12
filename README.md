@@ -52,10 +52,10 @@ blocks at the top of `css/styles.css` across.
 
 fernai.co.uk's managed WordPress strips `<script>` tags, so the frame can't be
 resized to fit the calculator. Use the **panel** embed instead: the frame has
-a fixed height relative to the visitor's screen, and the calculator fits
-inside it. On wide screens the inputs and the results scroll side by side, so
-the results stay in view; on phones it scrolls as one column, with the
-headline figure pinned at the top. Paste into a Custom HTML block:
+a fixed height relative to the visitor's screen, shorter than the calculator,
+which keeps its normal layout and scrolls inside it, so there's never empty
+space below it. While the headline result is out of view, a slim bar at the
+top of the frame shows it. Paste into a Custom HTML block:
 
 ```html
 <iframe src="https://fernailabs.github.io/ai-roi-calculator/?embed=panel"
@@ -63,9 +63,9 @@ headline figure pinned at the top. Paste into a Custom HTML block:
         style="width:100%;height:85vh;min-height:600px;border:0"></iframe>
 ```
 
-The page's own title goes in panel mode, so give the WordPress page a heading
-and a short intro above the frame (search engines don't credit text inside a
-frame to the page). Choose a full-width page template if the theme has one.
+Put a short intro above the frame on the WordPress page (search engines don't
+credit text inside a frame to the page), and choose a full-width page
+template if the theme has one.
 
 ### Optional: a full-page address at roi.fernai.co.uk
 
@@ -91,7 +91,7 @@ inner scrolling. Query parameters:
 | Parameter     | Effect                                                          |
 |---------------|-----------------------------------------------------------------|
 | `embed=1`     | Hides the header bar and footer (the host page supplies those); sends its height to the host page. |
-| `embed=panel` | For fixed-height frames: also hides the page title, and fits the calculator inside the frame (see above). |
+| `embed=panel` | For fixed-height frames: hides the header bar and footer; the calculator scrolls inside the frame, with the result pinned while it's out of view (see above). |
 | `theme=light` / `theme=dark` | Pins the theme, overriding the visitor's saved choice. |
 
 With `embed=1` the page posts its content height to the parent so the frame

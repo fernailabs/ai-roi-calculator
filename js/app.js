@@ -422,20 +422,18 @@
     post();
   }
 
-  // Panel embed: put the assistant at the top of the inputs column, so both
-  // columns can scroll inside a fixed-height frame, and the pricing note at
-  // the end of the results.
+  // Panel embed: the frame is shorter than the calculator and scrolls, so
+  // show the headline figure in a pinned bar whenever the result itself is
+  // out of view.
   function initPanel() {
     if (!PANEL) return;
-    const inputs = document.querySelector(".layout > .inputs");
-    const col = document.createElement("div");
-    col.className = "inputs-col";
-    inputs.parentNode.insertBefore(col, inputs);
-    col.append(els.assistant, inputs);
-    document.querySelector(".layout > .results").appendChild(els.priceSource);
     els.miniJump.addEventListener("click", () => {
       $("outcome-head").scrollIntoView({ behavior: "smooth", block: "start" });
     });
+    if (!("IntersectionObserver" in window)) return;
+    new IntersectionObserver(([entry]) => {
+      els.miniSummary.classList.toggle("show", !entry.isIntersecting);
+    }).observe(els.netValueTile);
   }
 
   // ---- assistant ("Describe your team") --------------------------------------------
