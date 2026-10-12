@@ -30,7 +30,7 @@ const config = {
   limits: {
     perMinute: int(env.RATE_PER_MINUTE, 3),
     perDay: int(env.RATE_PER_DAY, 15),
-    dailyTotal: int(env.DAILY_REQUEST_LIMIT, 500),
+    dailyTotal: int(env.DAILY_REQUEST_LIMIT, 100),
   },
 };
 

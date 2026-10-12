@@ -55,9 +55,15 @@ export async function verifyTurnstile({ secret, token, ip, fetchImpl = fetch }) 
   }
 }
 
-// Cloud Run puts the caller's address first in X-Forwarded-For.
+// Cloud Run's front end appends the caller's real address to
+// X-Forwarded-For, after anything the caller sent in that header itself. So
+// only the last entry can be trusted: taking the first would let a script
+// claim a new address on every request and slip past the per-visitor limits.
 export function clientIp(req) {
   const fwd = req.headers["x-forwarded-for"];
-  if (typeof fwd === "string" && fwd) return fwd.split(",")[0].trim();
+  if (typeof fwd === "string" && fwd.trim()) {
+    const parts = fwd.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
   return req.socket.remoteAddress || "unknown";
 }

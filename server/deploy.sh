@@ -24,7 +24,7 @@ SA="fernai-roi-assistant@${GCP_PROJECT}.iam.gserviceaccount.com"
 cd "$(dirname "$0")/.."
 
 env_vars="CLAUDE_MODEL=${CLAUDE_MODEL:-claude-opus-5-5},CLAUDE_EFFORT=${CLAUDE_EFFORT:-medium}"
-env_vars+=",RATE_PER_MINUTE=${RATE_PER_MINUTE:-3},RATE_PER_DAY=${RATE_PER_DAY:-15},DAILY_REQUEST_LIMIT=${DAILY_REQUEST_LIMIT:-500}"
+env_vars+=",RATE_PER_MINUTE=${RATE_PER_MINUTE:-3},RATE_PER_DAY=${RATE_PER_DAY:-15},DAILY_REQUEST_LIMIT=${DAILY_REQUEST_LIMIT:-100}"
 env_vars+=",PREVIEW=${PREVIEW}"
 # Commas separate --set-env-vars entries, so the origin list uses gcloud's
 # alternative-delimiter syntax (^;^) with semicolons between entries.

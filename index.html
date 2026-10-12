@@ -6,6 +6,11 @@
 <title>AI ROI Calculator | FernAI</title>
 <meta name="description" content="Free AI ROI calculator from FernAI. Estimate the monthly return on adopting AI tools for your team, and compare current API token costs across Claude, GPT, Gemini, Grok and Llama.">
 <meta name="theme-color" content="#0f172a">
+<!-- Only the calculator's own scripts may run (plus Cloudflare Turnstile if
+     it's switched on), and it may only talk to its own data and the
+     assistant on Cloud Run. The sha256 is of the inline script below; if you
+     edit that script, update the hash (server/test/server.test.mjs checks it). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-PNVx3VJuVgikb9UX2hA47V0Jfv3RDWHAq1NP3fgV88c=' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.run.app; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta property="og:site_name" content="FernAI">
 <meta property="og:title" content="AI ROI Calculator | FernAI">
 <meta property="og:description" content="Estimate the monthly return on adopting AI tools for your team, and compare current token costs across frontier models. Free, from FernAI.">
@@ -17,7 +22,7 @@
      set it to the Cloud Run service's URL to switch it on (see server/README.md).
      The Turnstile site key is optional and only used if the service requires it. -->
 <meta name="fernai-assistant-url" content="https://fernai-roi-assistant-588563919835.europe-west2.run.app">
-<meta name="fernai-turnstile-sitekey" content="">
+<meta name="fernai-turnstile-sitekey" content="0x4AAAAAAFUxTh16X9eJF2tD">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">

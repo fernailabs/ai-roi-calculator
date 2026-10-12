@@ -77,7 +77,7 @@ export function createHandler({ client, assumptions, prices, config, log = (o) =
     if (description.length > MAX_DESCRIPTION) throw new EstimateError(400, `Please keep it under ${MAX_DESCRIPTION} characters.`);
 
     const human = await verifyTurnstile({ secret: config.turnstileSecret, token: body.turnstileToken, ip, fetchImpl });
-    if (!human) throw new EstimateError(403, "Please complete the check above the button and try again.");
+    if (!human) throw new EstimateError(403, "Please complete the quick human check next to the button, then try again.");
 
     const refused = limiter.check(ip);
     if (refused === "daily") throw new EstimateError(429, "The assistant has reached today's limit. You can still fill in the calculator by hand.");
