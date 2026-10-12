@@ -9,7 +9,13 @@ const MAX_BODY_BYTES = 8 * 1024;
 const MAX_DESCRIPTION = 1200;
 const MIN_DESCRIPTION = 15;
 
-export function createApp({ client, assumptions, config, log = (o) => console.log(JSON.stringify(o)), fetchImpl }) {
+export function createApp(options) {
+  return http.createServer(createHandler(options));
+}
+
+// The request handler on its own, so the local dev server (src/dev.mjs) can
+// put it in front of the static site.
+export function createHandler({ client, assumptions, config, log = (o) => console.log(JSON.stringify(o)), fetchImpl }) {
   const limiter = createLimiter(config.limits);
   const allowed = new Set(config.allowedOrigins);
 
@@ -91,7 +97,7 @@ export function createApp({ client, assumptions, config, log = (o) => console.lo
     send(res, 200, suggestion);
   }
 
-  return http.createServer(async (req, res) => {
+  return async (req, res) => {
     const path = new URL(req.url, "http://x").pathname;
     try {
       if (req.method === "GET" && path === "/healthz") return send(res, 200, { ok: true });
@@ -114,5 +120,5 @@ export function createApp({ client, assumptions, config, log = (o) => console.lo
       log({ event: "error", message: err?.message });
       send(res, 500, { error: "Something went wrong. Please try again." });
     }
-  });
+  };
 }

@@ -19,6 +19,36 @@ It reads `data/assumptions.json`, the same file the page uses, so the roles
 and task types can't drift apart. That's why the `Dockerfile` sits at the
 repository root.
 
+## Try it on your own computer first
+
+You can use the assistant locally with real Claude calls before deploying
+anything or setting a budget. You need [Node.js 22](https://nodejs.org) and an
+Anthropic API key from <https://console.anthropic.com>. For testing, create a
+workspace with a small spend limit, such as $5, and a key in it.
+
+```bash
+git clone https://github.com/fernailabs/ai-roi-calculator.git
+cd ai-roi-calculator/server
+npm ci
+ANTHROPIC_API_KEY=sk-ant-... npm run dev
+```
+
+Open <http://localhost:8080>. The "Describe your team" panel is switched on,
+and the terminal prints each estimate's time, token counts and cost, with a
+running average:
+
+```
+estimate  #1  ·  14.2s  ·  1650 in  ·  1240 out (incl. thinking)  ·  $0.0314  ·  session total $0.0314  ·  average $0.0314
+```
+
+To compare cheaper settings, stop it (Ctrl+C) and start it again with, for
+example, `CLAUDE_EFFORT=low` or `CLAUDE_MODEL=claude-sonnet-5-5` in front of
+`npm run dev`. The average cost per estimate × the visitors you expect gives
+you the monthly budget; the [Cost](#cost) section below has more on this.
+
+On Windows PowerShell, set the key first with
+`$env:ANTHROPIC_API_KEY="sk-ant-..."` and then run `npm run dev`.
+
 ## Running the tests
 
 ```bash
