@@ -1,0 +1,17 @@
+{
+  "name": "fernai-roi-assistant",
+  "private": true,
+  "description": "Turns a plain-English description of a team into suggested inputs for the FernAI ROI calculator.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.mjs",
+    "dev": "node src/dev.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.133.0"
+  }
+}

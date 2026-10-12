@@ -100,6 +100,7 @@ input, select, button { font-family: inherit; }
 .appbar-note { color: var(--app-nav-muted); }
 .lockup-sub, .navbtn { white-space: nowrap; }
 @media (max-width: 400px) { .appbar-in { gap: 12px; } .lockup-sub { letter-spacing: 0.14em; } }
+@media (max-width: 360px) { .lockup-sub { display: none; } }
 @media (max-width: 480px) { .appbar-note { display: none; } }
 .navbtn {
   padding: 9px 14px; background: transparent; cursor: pointer;
@@ -211,6 +212,80 @@ select {
   text-overflow: ellipsis;
 }
 select option { background: var(--app-panel-2); color: var(--app-ink); }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset.field legend {
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--app-muted); padding: 0; margin-bottom: 2px;
+}
+fieldset:disabled .task { opacity: 0.45; }
+
+/* Two-way choice drawn as one ruled control. The layout sits on a plain div
+   rather than the fieldset, which some browsers (notably Safari) won't lay
+   out as a grid or flex container reliably. Labels are kept to one line and
+   each option fills its half, so the selected fill is always full height. */
+.segmented { display: flex; border: 1px solid var(--app-line); }
+.segmented label { flex: 1 1 0; position: relative; display: flex; cursor: pointer; min-width: 0; }
+.segmented input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.segmented span {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  text-align: center; white-space: nowrap; padding: 12px 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--app-muted);
+}
+.segmented label + label span { border-left: 1px solid var(--app-line); }
+.segmented input:checked + span { background: var(--app-ink); color: var(--app-bg); }
+.segmented input:focus-visible + span { outline: 2px solid var(--app-accent); outline-offset: -2px; }
+.access + .hint { margin-bottom: 18px; }
+
+.check { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 14px; }
+.check input { accent-color: var(--app-accent); width: 16px; height: 16px; margin: 3px 0 0; flex: none; }
+.field label.check {
+  justify-content: flex-start; align-items: flex-start; text-transform: none; letter-spacing: 0;
+  font-size: 14px; font-weight: 400; color: var(--app-ink); margin-bottom: 0;
+}
+.task { padding: 9px 0; border-bottom: 1px solid var(--app-line-soft); }
+.task:last-child { border-bottom: 0; }
+.task strong { display: block; font-weight: 600; }
+.task small { display: block; color: var(--app-faint); font-size: 12.5px; }
+#task-list { margin-top: 6px; }
+
+.usage-summary {
+  font-size: 13px; color: var(--app-muted); margin: 0 0 14px;
+  padding: 10px 12px; background: var(--app-panel-2); border-left: 2px solid var(--app-accent);
+}
+.field.manual { margin-bottom: 14px; }
+.field.manual .check { font-size: 13px; color: var(--app-muted); }
+
+/* ---- assistant ------------------------------------------------------------ */
+.assistant { border: 2px solid var(--app-line); margin-bottom: 40px; }
+.assistant-in {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  gap: 18px 36px; padding: 26px 28px;
+}
+@media (max-width: 900px) { .assistant-in { grid-template-columns: 1fr; padding: 22px 18px; } }
+.assistant .kicker { margin-bottom: 8px; }
+.assistant-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; margin: 0; }
+.assistant textarea {
+  width: 100%; background: var(--app-panel-2); border: 1px solid var(--app-line-soft);
+  color: var(--app-ink); font-size: 15px; line-height: 1.55; padding: 12px 14px; resize: vertical;
+}
+.assistant textarea:focus { outline: none; border-color: var(--app-accent); }
+.assistant-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 12px; }
+.assistant-actions .act { border: 0; cursor: pointer; }
+.assistant-actions .act:disabled { background: transparent; color: var(--app-faint); outline: 1px solid var(--app-line-soft); cursor: wait; }
+.assistant-status { font-size: 13px; color: var(--app-muted); }
+.turnstile:empty { display: none; }
+.assistant-result { grid-column: 1 / -1; border-top: 1px solid var(--app-line-soft); padding-top: 18px; }
+.assistant-summary { margin: 6px 0 8px; font-size: 15px; }
+.assistant-result ul { margin: 0 0 8px; padding-left: 18px; font-size: 13.5px; color: var(--app-muted); }
+.assistant-result li { margin-bottom: 4px; }
+.assistant-result li strong { color: var(--app-ink); font-weight: 600; }
 
 /* ---- results ------------------------------------------------------------ */
 .hero {

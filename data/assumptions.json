@@ -1,0 +1,73 @@
+{
+  "notes": "Starting assumptions for the calculator, shared by the web page and the assistant service. Token figures are rough per-request estimates for each kind of work, not measurements; requestsPerDay is per person on a working day. Seat prices are list prices per user per month, billed monthly, in USD, and are maintained by hand: check them against each vendor's pricing page and update reviewedOn.",
+  "taskTypes": [
+    {
+      "id": "quick",
+      "label": "Quick questions and emails",
+      "description": "Short prompts, replies and rewording",
+      "inputTokens": 600,
+      "outputTokens": 300,
+      "requestsPerDay": 6
+    },
+    {
+      "id": "writing",
+      "label": "Drafting documents and content",
+      "description": "Reports, proposals, marketing copy",
+      "inputTokens": 3000,
+      "outputTokens": 2000,
+      "requestsPerDay": 2
+    },
+    {
+      "id": "documents",
+      "label": "Summarising documents and meetings",
+      "description": "Long inputs, short summaries",
+      "inputTokens": 8000,
+      "outputTokens": 600,
+      "requestsPerDay": 2
+    },
+    {
+      "id": "research",
+      "label": "Research and analysis",
+      "description": "Several sources or data in, a considered answer out",
+      "inputTokens": 20000,
+      "outputTokens": 1500,
+      "requestsPerDay": 1
+    },
+    {
+      "id": "coding",
+      "label": "Coding assistance",
+      "description": "Code in context, suggestions and fixes out",
+      "inputTokens": 15000,
+      "outputTokens": 2000,
+      "requestsPerDay": 10
+    },
+    {
+      "id": "agents",
+      "label": "Automated workflows and agents",
+      "description": "Multi-step jobs that run with little supervision",
+      "inputTokens": 100000,
+      "outputTokens": 5000,
+      "requestsPerDay": 2
+    }
+  ],
+  "roles": [
+    { "id": "general", "label": "General office and operations", "hoursWeek": 8, "efficiencyPct": 25, "hourlyCostGbp": 32, "tasks": ["quick", "writing", "documents"] },
+    { "id": "support", "label": "Customer support", "hoursWeek": 15, "efficiencyPct": 30, "hourlyCostGbp": 26, "tasks": ["quick", "documents"] },
+    { "id": "sales", "label": "Sales and account management", "hoursWeek": 8, "efficiencyPct": 25, "hourlyCostGbp": 40, "tasks": ["quick", "writing", "research"] },
+    { "id": "marketing", "label": "Marketing and communications", "hoursWeek": 12, "efficiencyPct": 35, "hourlyCostGbp": 38, "tasks": ["writing", "research", "quick"] },
+    { "id": "finance", "label": "Finance and analysis", "hoursWeek": 10, "efficiencyPct": 25, "hourlyCostGbp": 45, "tasks": ["documents", "research", "quick"] },
+    { "id": "legal", "label": "Legal and compliance", "hoursWeek": 10, "efficiencyPct": 25, "hourlyCostGbp": 60, "tasks": ["documents", "research", "writing"] },
+    { "id": "hr", "label": "HR and people", "hoursWeek": 8, "efficiencyPct": 25, "hourlyCostGbp": 35, "tasks": ["writing", "quick", "documents"] },
+    { "id": "engineering", "label": "Software engineering", "hoursWeek": 15, "efficiencyPct": 30, "hourlyCostGbp": 55, "tasks": ["coding", "documents", "quick"] }
+  ],
+  "seatPlans": {
+    "reviewedOn": "2026-10-12",
+    "reviewNote": "Indicative list prices taken from public pricing summaries; not yet checked against the vendors' own pages.",
+    "plans": [
+      { "id": "chatgpt-business", "vendor": "OpenAI", "label": "ChatGPT Business", "usdPerSeatMonth": 25, "note": "Monthly billing; less on an annual plan" },
+      { "id": "claude-team", "vendor": "Anthropic", "label": "Claude Team", "usdPerSeatMonth": 25, "note": "Standard seat, monthly billing; less on an annual plan" },
+      { "id": "m365-copilot", "vendor": "Microsoft", "label": "Microsoft 365 Copilot", "usdPerSeatMonth": 30, "note": "Add-on; needs a Microsoft 365 licence" },
+      { "id": "gemini-workspace", "vendor": "Google", "label": "Gemini in Google Workspace", "usdPerSeatMonth": 14, "note": "Included in Workspace Business Standard; this is the whole Workspace seat" }
+    ]
+  }
+}

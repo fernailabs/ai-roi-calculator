@@ -1,0 +1,11 @@
+# Only the assistant service, its data and the page (for preview mode).
+*
+!server/package.json
+!server/package-lock.json
+!server/src/
+!data/assumptions.json
+!data/prices.json
+!index.html
+!favicon.svg
+!css/
+!js/
