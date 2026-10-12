@@ -1,9 +1,14 @@
 # AI ROI Calculator
 
 A small, static, no-build calculator that estimates the monthly return on
-adopting AI tools for a team, and compares API token costs across current
-frontier models from Anthropic, OpenAI, Google, xAI, and Meta (via a hosted
-provider, since Meta doesn't sell first-party per-token API access).
+adopting AI tools for a team. It compares per-seat subscriptions (ChatGPT,
+Claude, Copilot, Gemini) and pay-as-you-go API costs across current frontier
+models from Anthropic, OpenAI, Google, xAI and Meta (via a hosted provider,
+since Meta doesn't sell first-party per-token API access).
+
+Visitors describe their team in terms they know — a role, headcount, the
+kinds of work — rather than tokens. An optional AI assistant can fill the
+form in from a plain-English description.
 
 A free tool from [FernAI](https://fernai.co.uk), hosted on the FernAI website —
 not a commercial product.
@@ -12,6 +17,16 @@ not a commercial product.
 
 - `index.html` / `css/styles.css` / `js/app.js` — the calculator itself.
   Plain HTML/CSS/JS, no build step, no framework, no dependencies.
+- `js/calc.js` — the arithmetic, kept separate from the page so it's tested
+  on its own.
+- `data/assumptions.json` — hand-maintained starting assumptions: role
+  presets, the kinds of work (each with typical requests and tokens), and
+  seat-plan list prices. Check seat prices against the vendors' pages every
+  few months and update `reviewedOn`; the page shows that date.
+- `server/` — the optional "Describe your team" assistant, a small Cloud Run
+  service that calls Claude. See [server/README.md](server/README.md) for
+  setup and costs. The page works without it; the panel stays hidden until
+  its URL is set in `index.html`.
 - `data/prices.json` — a curated list of model token prices (USD per 1M
   input/output tokens), regenerated weekly.
 - `scripts/normalise-prices.mjs` — pulls the curated model list's prices out
@@ -86,7 +101,8 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
-No build step — just serve the directory.
+No build step — just serve the directory. Tests for the maths and the
+assistant service: `cd server && npm ci && npm test`.
 
 ## Deploying
 
