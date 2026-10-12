@@ -74,6 +74,11 @@ add/replace the entry there — the list is deliberately hand-maintained
 rather than "pick whatever's newest," since vendor naming (dated snapshots,
 `-latest` aliases, preview tags) is too inconsistent to infer reliably.
 
+If LiteLLM drops a key (a model is retired or renamed), the weekly run keeps
+that model's last published price, posts a "Stale price" warning on the
+Actions run, and still updates every other model. Check the run summary from
+time to time and swap in the new key when that warning appears.
+
 ## Local development
 
 ```bash

@@ -13,9 +13,12 @@
 
   const els = {
     teamSize: document.getElementById("team-size"),
-    teamSizeVal: document.getElementById("team-size-val"),
     hourlyCost: document.getElementById("hourly-cost"),
-    hourlyCostVal: document.getElementById("hourly-cost-val"),
+    hourlyCostSym: document.getElementById("hourly-cost-sym"),
+    hourlyCostExample: document.getElementById("hourly-cost-example"),
+    seatCostSym: document.getElementById("seat-cost-sym"),
+    seatCostExample: document.getElementById("seat-cost-example"),
+    efficiencyExample: document.getElementById("efficiency-example"),
     currency: document.getElementById("currency"),
     hoursWeek: document.getElementById("hours-week"),
     hoursWeekVal: document.getElementById("hours-week-val"),
@@ -47,7 +50,9 @@
   function fmtMoney(n, currency) {
     const sym = CURRENCY_SYMBOL[currency] || "";
     const sign = n < 0 ? "-" : "";
-    return `${sign}${sym}${Math.abs(n).toLocaleString(LOCALE, { maximumFractionDigits: 0 })}`;
+    // Pence below £10, so cheap models don't all read as "£0".
+    const digits = Math.abs(n) < 10 && n !== 0 ? 2 : 0;
+    return `${sign}${sym}${Math.abs(n).toLocaleString(LOCALE, { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
   }
 
   function priceInCurrency(usdPer1m, currency) {
@@ -89,19 +94,40 @@
     return { model, hoursSavedMonth, monthlyValue, monthlyCost, netValue, roiPct };
   }
 
+  // "£156 of value for every £1 spent on AI" reads more plainly than an ROI
+  // percentage in the tens of thousands.
+  function describeReturn(r, currency) {
+    if (r.monthlyCost <= 0) return "No AI cost entered.";
+    if (r.netValue < 0) return "At these inputs, AI costs more than the time it saves.";
+    const sym = CURRENCY_SYMBOL[currency] || "";
+    const perUnit = r.monthlyValue / r.monthlyCost;
+    const shown = perUnit < 10
+      ? perUnit.toLocaleString(LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : Math.round(perUnit).toLocaleString(LOCALE);
+    return `${sym}${shown} of time saved for every ${sym}1 spent on AI.`;
+  }
+
   function render() {
     if (!priceData) return;
     const inputs = readInputs();
     const r = compute(inputs);
 
-    els.teamSizeVal.textContent = inputs.teamSize;
-    els.hourlyCostVal.textContent = fmtMoney(inputs.hourlyCost, inputs.currency);
+    const sym = CURRENCY_SYMBOL[inputs.currency] || "";
+    els.hourlyCostSym.textContent = sym;
+    els.seatCostSym.textContent = sym;
+    els.hourlyCostExample.textContent = inputs.currency === "USD"
+      ? "a $65,000 salary is about $50 an hour"
+      : "a £50,000 salary is about £38 an hour";
+    els.seatCostExample.textContent = `10 seats at ${sym}25 is ${sym}250`;
+    const tenHours = 10 * (1 - inputs.efficiencyPct / 100);
+    els.efficiencyExample.textContent =
+      `At ${inputs.efficiencyPct}%, a 10-hour task takes ${tenHours.toLocaleString(LOCALE, { maximumFractionDigits: 1 })} hours.`;
     els.hoursWeekVal.textContent = inputs.hoursWeek;
     els.efficiencyVal.textContent = `${inputs.efficiencyPct}%`;
     els.interactionsWeekVal.textContent = inputs.interactionsWeek;
 
     els.netValue.textContent = fmtMoney(r.netValue, inputs.currency);
-    els.roiPct.textContent = r.roiPct == null ? "ROI —" : `ROI ${r.roiPct >= 0 ? "+" : ""}${Math.round(r.roiPct).toLocaleString(LOCALE)}% on monthly AI spend`;
+    els.roiPct.textContent = describeReturn(r, inputs.currency);
     els.netValueTile.classList.toggle("roi-neg", r.netValue < 0);
 
     els.monthlyValue.textContent = fmtMoney(r.monthlyValue, inputs.currency);
