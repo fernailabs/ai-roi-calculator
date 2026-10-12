@@ -9,10 +9,10 @@
 // update by hand and never silently swaps in a model nobody chose.
 //
 // Meta doesn't sell first-party per-token API access to Llama's flagship
-// weights, so its entries are priced via a third-party host (Groq) and
+// weights, so its entries are priced via a third-party host (DeepInfra) and
 // labelled as such.
 
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -49,11 +49,11 @@ const CURATED_MODELS = [
     litellmKey: "gpt-5-mini",
   },
   {
-    id: "gemini-3-pro-preview",
+    id: "gemini-3.1-pro-preview",
     vendor: "Google",
     tier: "flagship",
-    label: "Gemini 3 Pro",
-    litellmKey: "gemini-3-pro-preview",
+    label: "Gemini 3.1 Pro",
+    litellmKey: "gemini-3.1-pro-preview",
   },
   {
     id: "gemini-3.1-flash-lite",
@@ -70,27 +70,27 @@ const CURATED_MODELS = [
     litellmKey: "xai/grok-4.5",
   },
   {
-    id: "grok-4-1-fast",
+    id: "grok-4.3",
     vendor: "xAI",
     tier: "efficient",
-    label: "Grok 4.1 Fast",
-    litellmKey: "xai/grok-4-1-fast",
+    label: "Grok 4.3",
+    litellmKey: "xai/grok-4.3",
   },
   {
     id: "llama-4-maverick",
     vendor: "Meta",
     tier: "flagship",
     label: "Llama 4 Maverick",
-    litellmKey: "groq/meta-llama/llama-4-maverick-17b-128e-instruct",
-    hostNote: "via Groq",
+    litellmKey: "deepinfra/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+    hostNote: "via DeepInfra",
   },
   {
     id: "llama-4-scout",
     vendor: "Meta",
     tier: "efficient",
     label: "Llama 4 Scout",
-    litellmKey: "groq/meta-llama/llama-4-scout-17b-16e-instruct",
-    hostNote: "via Groq",
+    litellmKey: "deepinfra/meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    hostNote: "via DeepInfra",
   },
 ];
 
@@ -101,6 +101,15 @@ function perMillion(costPerToken) {
   return Number(perM.toPrecision(4));
 }
 
+async function readPrevious(outPath) {
+  try {
+    const data = JSON.parse(await readFile(outPath, "utf8"));
+    return new Map(data.models.map((m) => [m.id, m]));
+  } catch {
+    return new Map();
+  }
+}
+
 async function main() {
   const res = await fetch(SOURCE_URL);
   if (!res.ok) {
@@ -108,18 +117,29 @@ async function main() {
   }
   const catalogue = await res.json();
 
+  const outPath = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "data",
+    "prices.json"
+  );
+  const previous = await readPrevious(outPath);
+
   const models = CURATED_MODELS.map((m) => {
     const entry = catalogue[m.litellmKey];
-    if (!entry) {
-      throw new Error(
-        `litellm key "${m.litellmKey}" for ${m.id} not found in source catalogue — ` +
-          `the model may have been renamed or retired. Update CURATED_MODELS.`
-      );
-    }
-    const inputPer1m = perMillion(entry.input_cost_per_token);
-    const outputPer1m = perMillion(entry.output_cost_per_token);
+    const inputPer1m = perMillion(entry?.input_cost_per_token);
+    const outputPer1m = perMillion(entry?.output_cost_per_token);
     if (inputPer1m == null || outputPer1m == null) {
-      throw new Error(`litellm key "${m.litellmKey}" for ${m.id} has no usable pricing`);
+      const problem = entry
+        ? `litellm key "${m.litellmKey}" for ${m.id} has no usable pricing`
+        : `litellm key "${m.litellmKey}" for ${m.id} not found in source catalogue — ` +
+          `the model may have been renamed or retired. Update CURATED_MODELS.`;
+      // One retired key shouldn't freeze every other model's price, so keep
+      // the last published price for this model and flag it in the run.
+      const last = previous.get(m.id);
+      if (!last) throw new Error(problem);
+      console.log(`::warning title=Stale price for ${m.id}::${problem} Keeping last published price.`);
+      return last;
     }
     return {
       id: m.id,
@@ -145,12 +165,6 @@ async function main() {
     models,
   };
 
-  const outPath = path.join(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "..",
-    "data",
-    "prices.json"
-  );
   await writeFile(outPath, JSON.stringify(output, null, 2) + "\n");
   console.log(`Wrote ${models.length} models to ${outPath}`);
 }

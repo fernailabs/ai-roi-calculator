@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T11:31:22.905Z",
+  "generatedAt": "2026-10-12T14:12:41.232Z",
   "source": "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json",
   "sourceProject": "BerriAI/litellm",
   "notes": "Prices are USD per 1M tokens, list price, no volume/committed-use discounts. Meta doesn't sell first-party per-token Llama API access, so its entries are priced via a third-party inference host (noted per model). Refreshed weekly by GitHub Actions from the source above — treat as indicative, not a live quote.",
@@ -41,10 +41,10 @@
       "outputPer1mUsd": 2
     },
     {
-      "id": "gemini-3-pro-preview",
+      "id": "gemini-3.1-pro-preview",
       "vendor": "Google",
       "tier": "flagship",
-      "label": "Gemini 3 Pro",
+      "label": "Gemini 3.1 Pro",
       "hostNote": null,
       "inputPer1mUsd": 2,
       "outputPer1mUsd": 12
@@ -68,10 +68,10 @@
       "outputPer1mUsd": 6
     },
     {
-      "id": "grok-4-1-fast",
+      "id": "grok-4.3",
       "vendor": "xAI",
       "tier": "efficient",
-      "label": "Grok 4.1 Fast",
+      "label": "Grok 4.3",
       "hostNote": null,
       "inputPer1mUsd": 1.25,
       "outputPer1mUsd": 2.5
@@ -81,18 +81,18 @@
       "vendor": "Meta",
       "tier": "flagship",
       "label": "Llama 4 Maverick",
-      "hostNote": "via Groq",
+      "hostNote": "via DeepInfra",
       "inputPer1mUsd": 0.2,
-      "outputPer1mUsd": 0.6
+      "outputPer1mUsd": 0.8
     },
     {
       "id": "llama-4-scout",
       "vendor": "Meta",
       "tier": "efficient",
       "label": "Llama 4 Scout",
-      "hostNote": "via Groq",
-      "inputPer1mUsd": 0.11,
-      "outputPer1mUsd": 0.34
+      "hostNote": "via DeepInfra",
+      "inputPer1mUsd": 0.1,
+      "outputPer1mUsd": 0.3
     }
   ]
 }
