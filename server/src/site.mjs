@@ -58,7 +58,7 @@ export function withSite(apiHandler, root) {
   const site = createSiteHandler(root);
   return (req, res) => {
     const { pathname } = new URL(req.url, "http://x");
-    if (pathname.startsWith("/api/") || pathname === "/healthz") return apiHandler(req, res);
+    if (pathname.startsWith("/api/")) return apiHandler(req, res);
     return site(req, res);
   };
 }

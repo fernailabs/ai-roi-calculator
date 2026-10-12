@@ -9,7 +9,7 @@ reason for each. The page fills in the form and does all the arithmetic itself.
 - `src/estimate.mjs`: the prompt, the JSON schema Claude must answer in, and
   `sanitise()`, which clamps every number to a sensible range and drops
   anything unknown before it reaches the page.
-- `src/app.mjs`: the HTTP endpoint (`POST /api/estimate`, `GET /healthz`),
+- `src/app.mjs`: the HTTP endpoint (`POST /api/estimate`, `GET /api/health`),
   allowed origins (CORS), body and length limits.
 - `src/guards.mjs`: per-visitor and daily rate limits; optional Cloudflare
   Turnstile bot check.

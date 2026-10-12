@@ -71,6 +71,9 @@ then click Web Preview (the eye-shaped icon above the terminal) > Preview on por
 Costs per estimate:  ./server/costs.sh
 MSG
 else
-  echo "Deployed. Put this URL in index.html's fernai-assistant-url meta tag:"
-  echo "  $url"
+  echo "Deployed at $url"
+  echo -n "Health check: "
+  curl -s --max-time 30 "$url/api/health" || echo "no response"
+  echo
+  echo "index.html's fernai-assistant-url meta tag must point at this service."
 fi

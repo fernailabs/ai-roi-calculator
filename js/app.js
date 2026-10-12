@@ -402,7 +402,10 @@
     if (!EMBEDDED || window.parent === window) return;
     let last = 0;
     const post = () => {
-      const height = Math.ceil(document.documentElement.scrollHeight);
+      // The body's own height, not the document's scrollHeight: scrollHeight
+      // is never less than the frame itself, so the frame could grow (e.g. on
+      // switching to pay as you go) but never shrink back, leaving a tail.
+      const height = Math.ceil(document.body.getBoundingClientRect().height);
       if (height === last) return;
       last = height;
       window.parent.postMessage({ type: "fernai-roi-calc:height", height }, "*");
