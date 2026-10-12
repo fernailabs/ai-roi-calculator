@@ -60,12 +60,11 @@ the website. Query parameters:
 
 In embed mode the page posts its content height to the parent so the frame
 can grow to fit without an inner scrollbar. Paste this into the website
-(e.g. a WordPress *Custom HTML* block), replacing the `src` with wherever
-the calculator is deployed:
+(e.g. a WordPress *Custom HTML* block):
 
 ```html
 <iframe id="fernai-roi-calc"
-        src="https://CALCULATOR-URL/?embed=1"
+        src="https://fernailabs.github.io/ai-roi-calculator/?embed=1"
         title="AI ROI Calculator"
         style="width:100%;border:0;min-height:1400px"
         loading="lazy"></iframe>
@@ -80,6 +79,13 @@ the calculator is deployed:
 
 Links inside the calculator (the CTA and footer) open in the top window, so a
 visitor clicking through leaves the iframe rather than loading the site inside it.
+
+The "Describe your team" assistant works inside the iframe without changes:
+its requests come from the calculator's own address (`fernailabs.github.io`),
+which the assistant service already allows. If you serve the calculator from
+a different address, such as a `roi.fernai.co.uk` subdomain, redeploy the
+service with that address added:
+`ALLOWED_ORIGINS=https://roi.fernai.co.uk,https://fernailabs.github.io ./server/deploy.sh`.
 
 ## Updating the model list
 
