@@ -1,11 +1,14 @@
-# What `gcloud run deploy --source .` uploads; mirrors .dockerignore.
-*
-!server/package.json
-!server/package-lock.json
-!server/src/
-!data/assumptions.json
-!data/prices.json
-!index.html
-!favicon.svg
-!css/
-!js/
+# What `gcloud run deploy --source .` leaves out of the upload to Cloud Build.
+# Listed as exclusions: gcloud can't re-include files inside an excluded
+# folder, so an "ignore everything except" list silently drops the service.
+# .dockerignore then narrows what goes into the image itself.
+.git
+.github/
+.gitignore
+.gcloudignore
+**/node_modules/
+server/test/
+scripts/
+*.md
+.nojekyll
+.DS_Store
