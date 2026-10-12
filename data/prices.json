@@ -1,44 +1,71 @@
 {
-  "generatedAt": "2026-10-12T14:12:41.232Z",
+  "generatedAt": "2026-10-12T14:15:44.105Z",
   "source": "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json",
   "sourceProject": "BerriAI/litellm",
   "notes": "Prices are USD per 1M tokens, list price, no volume/committed-use discounts. Meta doesn't sell first-party per-token Llama API access, so its entries are priced via a third-party inference host (noted per model). Refreshed weekly by GitHub Actions from the source above — treat as indicative, not a live quote.",
   "models": [
     {
-      "id": "claude-opus-5",
+      "id": "claude-opus-5-5",
       "vendor": "Anthropic",
       "tier": "flagship",
-      "label": "Claude Opus 5",
+      "label": "Claude Opus 5.5",
       "hostNote": null,
-      "inputPer1mUsd": 5,
-      "outputPer1mUsd": 25
+      "inputPer1mUsd": 4,
+      "outputPer1mUsd": 20
     },
     {
-      "id": "claude-haiku-4-5",
+      "id": "claude-fable-5-1",
+      "vendor": "Anthropic",
+      "tier": "flagship",
+      "label": "Claude Fable 5.1",
+      "hostNote": null,
+      "inputPer1mUsd": 10,
+      "outputPer1mUsd": 50
+    },
+    {
+      "id": "claude-sonnet-5-5",
       "vendor": "Anthropic",
       "tier": "efficient",
-      "label": "Claude Haiku 4.5",
+      "label": "Claude Sonnet 5.5",
       "hostNote": null,
-      "inputPer1mUsd": 1,
-      "outputPer1mUsd": 5
+      "inputPer1mUsd": 2,
+      "outputPer1mUsd": 10
     },
     {
-      "id": "gpt-5.2",
+      "id": "claude-haiku-5-5",
+      "vendor": "Anthropic",
+      "tier": "efficient",
+      "label": "Claude Haiku 5.5",
+      "hostNote": null,
+      "inputPer1mUsd": 0.1,
+      "outputPer1mUsd": 0.5
+    },
+    {
+      "id": "gpt-6-astra",
       "vendor": "OpenAI",
       "tier": "flagship",
-      "label": "GPT-5.2",
+      "label": "GPT-6 Astra",
       "hostNote": null,
-      "inputPer1mUsd": 1.75,
-      "outputPer1mUsd": 14
+      "inputPer1mUsd": 10,
+      "outputPer1mUsd": 50
     },
     {
-      "id": "gpt-5-mini",
+      "id": "gpt-6.1-sol",
+      "vendor": "OpenAI",
+      "tier": "flagship",
+      "label": "GPT-6.1 Sol",
+      "hostNote": null,
+      "inputPer1mUsd": 2,
+      "outputPer1mUsd": 10
+    },
+    {
+      "id": "gpt-6-luna",
       "vendor": "OpenAI",
       "tier": "efficient",
-      "label": "GPT-5 mini",
+      "label": "GPT-6 Luna",
       "hostNote": null,
-      "inputPer1mUsd": 0.25,
-      "outputPer1mUsd": 2
+      "inputPer1mUsd": 0.1,
+      "outputPer1mUsd": 0.5
     },
     {
       "id": "gemini-3.1-pro-preview",
@@ -50,19 +77,19 @@
       "outputPer1mUsd": 12
     },
     {
-      "id": "gemini-3.1-flash-lite",
+      "id": "gemini-3.8-flash",
       "vendor": "Google",
       "tier": "efficient",
-      "label": "Gemini 3.1 Flash Lite",
+      "label": "Gemini 3.8 Flash",
       "hostNote": null,
-      "inputPer1mUsd": 0.25,
-      "outputPer1mUsd": 1.5
+      "inputPer1mUsd": 0.75,
+      "outputPer1mUsd": 3.75
     },
     {
-      "id": "grok-4.5",
+      "id": "grok-4.7",
       "vendor": "xAI",
       "tier": "flagship",
-      "label": "Grok 4.5",
+      "label": "Grok 4.7",
       "hostNote": null,
       "inputPer1mUsd": 2,
       "outputPer1mUsd": 6

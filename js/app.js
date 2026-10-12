@@ -47,7 +47,9 @@
   function fmtMoney(n, currency) {
     const sym = CURRENCY_SYMBOL[currency] || "";
     const sign = n < 0 ? "-" : "";
-    return `${sign}${sym}${Math.abs(n).toLocaleString(LOCALE, { maximumFractionDigits: 0 })}`;
+    // Pence below £10, so cheap models don't all read as "£0".
+    const digits = Math.abs(n) < 10 && n !== 0 ? 2 : 0;
+    return `${sign}${sym}${Math.abs(n).toLocaleString(LOCALE, { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
   }
 
   function priceInCurrency(usdPer1m, currency) {
