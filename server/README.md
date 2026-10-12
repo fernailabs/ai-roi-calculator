@@ -19,35 +19,113 @@ It reads `data/assumptions.json`, the same file the page uses, so the roles
 and task types can't drift apart. That's why the `Dockerfile` sits at the
 repository root.
 
-## Try it on your own computer first
+## Deploying from Cloud Shell
 
-You can use the assistant locally with real Claude calls before deploying
-anything or setting a budget. You need [Node.js 22](https://nodejs.org) and an
-Anthropic API key from <https://console.anthropic.com>. For testing, create a
-workspace with a small spend limit, such as $5, and a key in it.
+Everything below runs in **Cloud Shell**, the terminal in the Google Cloud
+console (the `>_` icon at the top right). It already has `gcloud` and `git`,
+and the image is built by Cloud Build, so nothing needs installing.
+
+Before you start, create an Anthropic API key at
+<https://console.anthropic.com>, ideally in its own workspace with a monthly
+spend limit. The service has its own daily cap (see Configuration), but the
+Console limit is the hard ceiling.
+
+### 1. Get the code and choose the project
 
 ```bash
 git clone https://github.com/fernailabs/ai-roi-calculator.git
-cd ai-roi-calculator/server
+cd ai-roi-calculator
+gcloud config set project fernai-roicalc
+```
+
+(While these changes are unmerged, add
+`git checkout claude/fernai-roi-calculator-branding-2azxgb` after `cd`.)
+
+### 2. One-time setup
+
+```bash
+./server/setup-gcp.sh
+```
+
+This enables the Google Cloud services it needs, creates the
+`fernai-roi-assistant` service account, lets Cloud Build build from source,
+and asks you to paste the API key. The key isn't shown as you paste it and is
+stored only in Secret Manager. It's safe to run again; run it again to replace
+the key.
+
+### 3. Deploy a private preview and try it
+
+```bash
+PREVIEW=1 ./server/deploy.sh
+```
+
+The first deploy takes a few minutes, and may ask to create an Artifact
+Registry repository: answer `y`. This deploys a separate
+`fernai-roi-assistant-preview` service that also serves the calculator page
+with the assistant switched on. It is private: only accounts with Cloud Run
+access to the project, such as yours, can open it. To open it:
+
+```bash
+gcloud run services proxy fernai-roi-assistant-preview --region europe-west2 --port 8080
+```
+
+Then click **Web Preview** (the eye-shaped icon above the terminal) and
+**Preview on port 8080**. Try some descriptions. Press Ctrl+C in the terminal
+to stop the proxy.
+
+To see what each estimate cost:
+
+```bash
+./server/costs.sh        # the last day; ./server/costs.sh 7d for a week
+```
+
+```
+time (UTC)              secs       in      out      cost  model
+2026-10-12T15:01:02     14.2     1650     1240   $0.0314  claude-opus-5-5
+
+1 estimates, total $0.0314, average $0.0314
+```
+
+To compare cheaper settings, redeploy the preview with, for example,
+`CLAUDE_EFFORT=low PREVIEW=1 ./server/deploy.sh` or
+`CLAUDE_MODEL=claude-sonnet-5-5 PREVIEW=1 ./server/deploy.sh`, then try the
+same descriptions again. The average cost per estimate × the visitors you
+expect to use the panel gives the monthly budget.
+
+### 4. Go live
+
+```bash
+./server/deploy.sh
+```
+
+This deploys the public `fernai-roi-assistant` service, which only answers
+the calculator's own sites (see `ALLOWED_ORIGINS`) and doesn't serve the page.
+It prints the service URL: put it in `index.html`,
+
+```html
+<meta name="fernai-assistant-url" content="https://fernai-roi-assistant-xxxx.a.run.app">
+```
+
+and merge to `main`. The page redeploys with the panel visible. Leave the URL
+empty to hide the panel again; the rest of the calculator works without the
+service. Once live, you can delete the preview service in the Cloud Run
+console, or keep it for trying changes.
+
+Re-run the deploy after changing anything in `server/` or
+`data/assumptions.json`.
+
+## Running it on your own computer
+
+The same preview runs locally with Node.js 22, without Google Cloud:
+
+```bash
+cd server
 npm ci
 ANTHROPIC_API_KEY=sk-ant-... npm run dev
 ```
 
-Open <http://localhost:8080>. The "Describe your team" panel is switched on,
-and the terminal prints each estimate's time, token counts and cost, with a
-running average:
-
-```
-estimate  #1  ·  14.2s  ·  1650 in  ·  1240 out (incl. thinking)  ·  $0.0314  ·  session total $0.0314  ·  average $0.0314
-```
-
-To compare cheaper settings, stop it (Ctrl+C) and start it again with, for
-example, `CLAUDE_EFFORT=low` or `CLAUDE_MODEL=claude-sonnet-5-5` in front of
-`npm run dev`. The average cost per estimate × the visitors you expect gives
-you the monthly budget; the [Cost](#cost) section below has more on this.
-
-On Windows PowerShell, set the key first with
-`$env:ANTHROPIC_API_KEY="sk-ant-..."` and then run `npm run dev`.
+Open <http://localhost:8080>. The terminal prints each estimate's time, tokens
+and cost. This also works inside Cloud Shell, using Web Preview on port 8080.
 
 ## Running the tests
 
@@ -60,63 +138,10 @@ npm test
 The tests use a stand-in for the Claude client, so they need no API key and
 make no network calls. CI runs them on every pull request.
 
-## One-time setup
-
-You need a Google Cloud project with billing enabled, the `gcloud` CLI, and an
-Anthropic API key from <https://console.anthropic.com>.
-
-1. **Set a spend limit on the Anthropic key.** In the Anthropic Console, give
-   this key its own workspace with a monthly spend limit. The service has its
-   own daily cap (below), but the Console limit is the hard ceiling.
-
-2. **Enable the APIs and create a service account:**
-
-   ```bash
-   export GCP_PROJECT=your-project-id
-   gcloud services enable run.googleapis.com cloudbuild.googleapis.com \
-     artifactregistry.googleapis.com secretmanager.googleapis.com --project "$GCP_PROJECT"
-   gcloud iam service-accounts create fernai-roi-assistant \
-     --display-name "FernAI ROI assistant" --project "$GCP_PROJECT"
-   ```
-
-3. **Store the API key in Secret Manager** (it is never put in the image,
-   the repository or an environment file):
-
-   ```bash
-   read -rs ANTHROPIC_KEY   # paste the key, then Enter
-   printf %s "$ANTHROPIC_KEY" | gcloud secrets create anthropic-api-key \
-     --data-file=- --project "$GCP_PROJECT"
-   gcloud secrets add-iam-policy-binding anthropic-api-key \
-     --member "serviceAccount:fernai-roi-assistant@${GCP_PROJECT}.iam.gserviceaccount.com" \
-     --role roles/secretmanager.secretAccessor --project "$GCP_PROJECT"
-   ```
-
-4. **Deploy** from the repository root:
-
-   ```bash
-   GCP_PROJECT=your-project-id ./server/deploy.sh
-   ```
-
-   It builds with Cloud Build, deploys to Cloud Run in `europe-west2`
-   (London), and prints the service URL.
-
-5. **Switch the panel on.** Put that URL in `index.html`:
-
-   ```html
-   <meta name="fernai-assistant-url" content="https://fernai-roi-assistant-xxxx.a.run.app">
-   ```
-
-   Merge to `main` and the page redeploys with the panel visible. Leave the
-   URL empty to hide the panel again; the rest of the calculator works
-   without the service.
-
-Re-run `./server/deploy.sh` after changing anything in `server/` or
-`data/assumptions.json`.
-
 ## Configuration
 
 Set as environment variables by `deploy.sh`. Override any of them when
-running it, e.g. `CLAUDE_EFFORT=low GCP_PROJECT=… ./server/deploy.sh`.
+running it, e.g. `CLAUDE_EFFORT=low ./server/deploy.sh`.
 
 | Variable | Default | What it does |
 |---|---|---|
@@ -127,6 +152,7 @@ running it, e.g. `CLAUDE_EFFORT=low GCP_PROJECT=… ./server/deploy.sh`.
 | `RATE_PER_DAY` | `15` | Requests per visitor per day. |
 | `DAILY_REQUEST_LIMIT` | `500` | Requests across all visitors per day, per instance; after that the panel says to fill the form in by hand. |
 | `TURNSTILE` | `0` | `1` requires a Cloudflare Turnstile check (see below). |
+| `PREVIEW` | `0` | `1` deploys the private `fernai-roi-assistant-preview` service, which also serves the page and accepts any origin. |
 
 Counters are kept in memory per instance and `deploy.sh` caps the service at
 two instances, so the effective limits are at most double the figures above.
@@ -153,12 +179,14 @@ is usually invisible to people:
 1. Create a Turnstile widget in Cloudflare for your calculator's domain.
 2. Store its secret key:
    ```bash
+   read -rs TURNSTILE_SECRET   # paste the secret, then Enter
+   GCP_PROJECT=$(gcloud config get-value project)
    printf %s "$TURNSTILE_SECRET" | gcloud secrets create turnstile-secret --data-file=- --project "$GCP_PROJECT"
    gcloud secrets add-iam-policy-binding turnstile-secret \
      --member "serviceAccount:fernai-roi-assistant@${GCP_PROJECT}.iam.gserviceaccount.com" \
      --role roles/secretmanager.secretAccessor --project "$GCP_PROJECT"
    ```
-3. Redeploy with `TURNSTILE=1 GCP_PROJECT=… ./server/deploy.sh`.
+3. Redeploy with `TURNSTILE=1 ./server/deploy.sh`.
 4. Put the site key in `index.html`'s `fernai-turnstile-sitekey` meta tag.
 
 ## Privacy

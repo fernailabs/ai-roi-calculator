@@ -4,3 +4,8 @@
 !server/package-lock.json
 !server/src/
 !data/assumptions.json
+!data/prices.json
+!index.html
+!favicon.svg
+!css/
+!js/

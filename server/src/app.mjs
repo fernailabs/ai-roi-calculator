@@ -4,6 +4,7 @@
 import http from "node:http";
 import { estimate, EstimateError } from "./estimate.mjs";
 import { createLimiter, verifyTurnstile, clientIp } from "./guards.mjs";
+import { costUsd } from "./cost.mjs";
 
 const MAX_BODY_BYTES = 8 * 1024;
 const MAX_DESCRIPTION = 1200;
@@ -15,20 +16,25 @@ export function createApp(options) {
 
 // The request handler on its own, so the local dev server (src/dev.mjs) can
 // put it in front of the static site.
-export function createHandler({ client, assumptions, config, log = (o) => console.log(JSON.stringify(o)), fetchImpl }) {
+export function createHandler({ client, assumptions, prices, config, log = (o) => console.log(JSON.stringify(o)), fetchImpl }) {
   const limiter = createLimiter(config.limits);
   const allowed = new Set(config.allowedOrigins);
+  // Preview and local runs serve the page from the same address as the API,
+  // and that address isn't known in advance (localhost, a Cloud Shell Web
+  // Preview, the Cloud Run proxy), so they accept any origin. Only use this
+  // where the service itself isn't public.
+  const originOk = (origin) => config.allowAnyOrigin || allowed.has(origin);
 
   function cors(req, res) {
     const origin = req.headers.origin;
-    if (origin && allowed.has(origin)) {
+    if (origin && originOk(origin)) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Vary", "Origin");
       res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "content-type");
       res.setHeader("Access-Control-Max-Age", "3600");
     }
-    return !origin || allowed.has(origin);
+    return !origin || originOk(origin);
   }
 
   function send(res, status, body) {
@@ -93,6 +99,7 @@ export function createHandler({ client, assumptions, config, log = (o) => consol
       chars: description.length,
       input_tokens: usage?.input_tokens,
       output_tokens: usage?.output_tokens,
+      cost_usd: costUsd(prices, model, usage),
     });
     send(res, 200, suggestion);
   }
@@ -103,13 +110,13 @@ export function createHandler({ client, assumptions, config, log = (o) => consol
       if (req.method === "GET" && path === "/healthz") return send(res, 200, { ok: true });
 
       if (path !== "/api/estimate") return send(res, 404, { error: "Not found." });
-      const originOk = cors(req, res);
+      const permitted = cors(req, res);
       if (req.method === "OPTIONS") {
-        res.writeHead(originOk ? 204 : 403);
+        res.writeHead(permitted ? 204 : 403);
         return res.end();
       }
       if (req.method !== "POST") return send(res, 405, { error: "Method not allowed." });
-      if (!originOk) return send(res, 403, { error: "Not allowed from this site." });
+      if (!permitted) return send(res, 403, { error: "Not allowed from this site." });
 
       await handleEstimate(req, res);
     } catch (err) {

@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { estimate, sanitise, outputSchema, EstimateError } from "../src/estimate.mjs";
 import { createLimiter, verifyTurnstile } from "../src/guards.mjs";
-import { createApp } from "../src/app.mjs";
+import { createApp, createHandler } from "../src/app.mjs";
+import http from "node:http";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { withSite } from "../src/site.mjs";
+import { costUsd } from "../src/cost.mjs";
 
 const assumptions = JSON.parse(await readFile(new URL("../../data/assumptions.json", import.meta.url), "utf8"));
 
@@ -236,4 +241,39 @@ test("health check and unknown paths", async () => {
     assert.equal((await fetch(`${base}/healthz`)).status, 200);
     assert.equal((await fetch(`${base}/nope`)).status, 404);
   });
+});
+
+// ---- preview mode -------------------------------------------------------------
+
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+
+test("preview serves the page with the assistant pointed at itself, and nothing else", async () => {
+  const api = createHandler({ client: fakeClient(good), assumptions, config: {
+    model: "claude-opus-5-5", effort: "medium", allowedOrigins: [], allowAnyOrigin: true, turnstileSecret: "",
+    limits: { perMinute: 5, perDay: 5, dailyTotal: 5 } }, log: () => {} });
+  const server = http.createServer(withSite(api, repoRoot));
+  await new Promise((r) => server.listen(0, r));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const page = await (await fetch(`${base}/`)).text();
+    assert.match(page, /<meta name="fernai-assistant-url" content=".">/);
+    assert.equal((await fetch(`${base}/js/calc.js`)).status, 200);
+    assert.equal((await fetch(`${base}/data/assumptions.json`)).status, 200);
+    for (const p of ["/server/src/app.mjs", "/server/package.json", "/Dockerfile", "/%2e%2e/%2e%2e/etc/passwd", "/.git/config"]) {
+      assert.equal((await fetch(`${base}${p}`)).status, 404, p);
+    }
+    // Any origin is accepted in preview: the Web Preview address isn't known in advance.
+    const res = await post(base, { description: "We are 12 people in customer support." }, "https://8080-cs-123.cloudshell.dev");
+    assert.equal(res.status, 200);
+  } finally {
+    server.close();
+  }
+});
+
+test("cost uses the price list and counts thinking as output", () => {
+  const prices = { models: [{ id: "claude-opus-5-5", inputPer1mUsd: 4, outputPer1mUsd: 20 }] };
+  assert.equal(costUsd(prices, "claude-opus-5-5", { input_tokens: 1_000_000, output_tokens: 100_000 }), 6);
+  assert.equal(costUsd(prices, "unknown", { input_tokens: 1 }), null);
+  assert.equal(costUsd(null, "claude-opus-5-5", { input_tokens: 1 }), null);
 });
