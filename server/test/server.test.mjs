@@ -238,7 +238,7 @@ test("a failing Claude call becomes a 502, not a crash", async () => {
 
 test("health check and unknown paths", async () => {
   await withApp({}, async (base) => {
-    assert.equal((await fetch(`${base}/healthz`)).status, 200);
+    assert.equal((await fetch(`${base}/api/health`)).status, 200);
     assert.equal((await fetch(`${base}/nope`)).status, 404);
   });
 });

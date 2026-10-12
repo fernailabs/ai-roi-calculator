@@ -107,7 +107,9 @@ export function createHandler({ client, assumptions, prices, config, log = (o) =
   return async (req, res) => {
     const path = new URL(req.url, "http://x").pathname;
     try {
-      if (req.method === "GET" && path === "/healthz") return send(res, 200, { ok: true });
+      // Not /healthz: Cloud Run reserves some paths ending in "z" and answers
+      // them itself with a Google 404, so they never reach the service.
+      if (req.method === "GET" && path === "/api/health") return send(res, 200, { ok: true });
 
       if (path !== "/api/estimate") return send(res, 404, { error: "Not found." });
       const permitted = cors(req, res);
