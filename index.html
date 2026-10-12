@@ -145,12 +145,14 @@
 
         <h2 class="kicker group-head">How you'll pay for AI</h2>
 
-        <fieldset class="segmented" aria-describedby="access-hint">
+        <fieldset class="access" aria-describedby="access-hint">
           <legend class="visually-hidden">How you'll pay for AI</legend>
-          <label><input type="radio" name="access" value="seats" checked> <span>Per-seat subscription</span></label>
-          <label><input type="radio" name="access" value="api"> <span>Pay as you go</span></label>
+          <div class="segmented">
+            <label><input type="radio" name="access" value="seats" checked> <span>Per-seat plan</span></label>
+            <label><input type="radio" name="access" value="api"> <span>Pay as you go</span></label>
+          </div>
         </fieldset>
-        <p class="hint" id="access-hint">Most teams buy a plan such as ChatGPT, Claude or Copilot per person. Pay as you go means paying per use through an AI provider's API, usually for tools you build or buy on top of it.</p>
+        <p class="hint" id="access-hint">Most teams buy a subscription such as ChatGPT, Claude or Copilot for each person. Pay as you go means paying per use through an AI provider's API, usually for tools you build or buy on top of it.</p>
 
         <div data-mode="seats">
           <div class="field">
