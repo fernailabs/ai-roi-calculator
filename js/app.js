@@ -36,14 +36,18 @@
     barList: document.getElementById("bar-list"),
     priceSource: document.getElementById("price-source"),
     themeToggle: document.getElementById("theme-toggle"),
+    year: document.getElementById("year"),
   };
+
+  const LOCALE = "en-GB";
+  const EMBEDDED = document.documentElement.hasAttribute("data-embed");
 
   let priceData = null;
 
   function fmtMoney(n, currency) {
     const sym = CURRENCY_SYMBOL[currency] || "";
     const sign = n < 0 ? "-" : "";
-    return `${sign}${sym}${Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    return `${sign}${sym}${Math.abs(n).toLocaleString(LOCALE, { maximumFractionDigits: 0 })}`;
   }
 
   function priceInCurrency(usdPer1m, currency) {
@@ -97,12 +101,12 @@
     els.interactionsWeekVal.textContent = inputs.interactionsWeek;
 
     els.netValue.textContent = fmtMoney(r.netValue, inputs.currency);
-    els.roiPct.textContent = r.roiPct == null ? "ROI —" : `ROI ${r.roiPct >= 0 ? "+" : ""}${r.roiPct.toFixed(0)}% / month`;
+    els.roiPct.textContent = r.roiPct == null ? "ROI —" : `ROI ${r.roiPct >= 0 ? "+" : ""}${Math.round(r.roiPct).toLocaleString(LOCALE)}% on monthly AI spend`;
     els.netValueTile.classList.toggle("roi-neg", r.netValue < 0);
 
     els.monthlyValue.textContent = fmtMoney(r.monthlyValue, inputs.currency);
     els.monthlyCost.textContent = fmtMoney(r.monthlyCost, inputs.currency);
-    els.hoursSaved.textContent = r.hoursSavedMonth.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    els.hoursSaved.textContent = r.hoursSavedMonth.toLocaleString(LOCALE, { maximumFractionDigits: 0 });
 
     renderBars(inputs);
     persist(inputs);
@@ -121,7 +125,11 @@
 
       const name = document.createElement("div");
       name.className = "bar-name";
-      name.innerHTML = `<span class="vendor">${model.vendor}${model.hostNote ? " · " + model.hostNote : ""}</span>${model.label}`;
+      const vendor = document.createElement("span");
+      vendor.className = "vendor";
+      vendor.textContent = model.vendor + (model.hostNote ? " · " + model.hostNote : "");
+      name.append(vendor, model.label);
+      name.title = model.label;
 
       const track = document.createElement("div");
       track.className = "bar-track";
@@ -173,24 +181,41 @@
     } catch (_) { /* ignore malformed storage */ }
   }
 
+  // Light is the brand default (no attribute); dark is stamped. The inline
+  // bootstrap in index.html has already applied any saved or ?theme= choice.
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  }
+
   function initTheme() {
-    const saved = localStorage.getItem(THEME_KEY);
-    if (saved) document.documentElement.setAttribute("data-theme", saved);
     updateThemeLabel();
     els.themeToggle.addEventListener("click", () => {
-      const current = document.documentElement.getAttribute("data-theme")
-        || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-      const next = current === "light" ? "dark" : "light";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem(THEME_KEY, next);
+      const next = currentTheme() === "dark" ? "light" : "dark";
+      if (next === "dark") document.documentElement.setAttribute("data-theme", "dark");
+      else document.documentElement.removeAttribute("data-theme");
+      try { localStorage.setItem(THEME_KEY, next); } catch (_) { /* storage unavailable */ }
       updateThemeLabel();
     });
   }
 
   function updateThemeLabel() {
-    const current = document.documentElement.getAttribute("data-theme")
-      || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-    els.themeToggle.textContent = current === "light" ? "Dark mode" : "Light mode";
+    els.themeToggle.textContent = currentTheme() === "dark" ? "Light theme" : "Dark theme";
+  }
+
+  // In an iframe, tell the host page how tall the content is so it can size
+  // the frame without an inner scrollbar. See README "Embedding".
+  function initEmbedResize() {
+    if (!EMBEDDED || window.parent === window) return;
+    let last = 0;
+    const post = () => {
+      const height = Math.ceil(document.documentElement.scrollHeight);
+      if (height === last) return;
+      last = height;
+      window.parent.postMessage({ type: "fernai-roi-calc:height", height }, "*");
+    };
+    if ("ResizeObserver" in window) new ResizeObserver(post).observe(document.body);
+    window.addEventListener("load", post);
+    post();
   }
 
   function wireInputs() {
@@ -202,13 +227,15 @@
   }
 
   async function init() {
+    if (els.year) els.year.textContent = new Date().getFullYear();
     initTheme();
+    initEmbedResize();
     wireInputs();
     try {
       const res = await fetch("data/prices.json", { cache: "no-store" });
       priceData = await res.json();
     } catch (err) {
-      els.barList.innerHTML = '<div class="loading-note">Couldn\'t load pricing data.</div>';
+      els.barList.innerHTML = '<div class="loading">Couldn\'t load pricing data. Please refresh the page.</div>';
       console.error(err);
       return;
     }
@@ -218,8 +245,9 @@
 
     const generated = new Date(priceData.generatedAt);
     els.priceSource.innerHTML =
-      `Token prices refreshed weekly from <a href="${priceData.source}" target="_blank" rel="noopener">${priceData.sourceProject}</a> — ` +
-      `last updated ${generated.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}.`;
+      `Token prices are refreshed weekly from <a href="${priceData.source}" target="_blank" rel="noopener">${priceData.sourceProject}</a>, ` +
+      `last updated ${generated.toLocaleDateString(LOCALE, { year: "numeric", month: "long", day: "numeric" })}. ` +
+      `GBP figures use a fixed approximate exchange rate.`;
 
     render();
   }

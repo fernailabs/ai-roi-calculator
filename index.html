@@ -1,153 +1,199 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI ROI Calculator — estimate the return on AI adoption</title>
-<meta name="description" content="Estimate the monthly return on adopting AI tools for your team, and compare live API token costs across Claude, GPT, Gemini, Grok and Llama. Free calculator by FernAI.">
-<meta property="og:title" content="AI ROI Calculator">
-<meta property="og:description" content="Estimate the monthly return on adopting AI tools for your team, and compare live token costs across frontier models.">
+<title>AI ROI Calculator | FernAI</title>
+<meta name="description" content="Free AI ROI calculator from FernAI. Estimate the monthly return on adopting AI tools for your team, and compare current API token costs across Claude, GPT, Gemini, Grok and Llama.">
+<meta name="theme-color" content="#0f172a">
+<meta property="og:site_name" content="FernAI">
+<meta property="og:title" content="AI ROI Calculator | FernAI">
+<meta property="og:description" content="Estimate the monthly return on adopting AI tools for your team, and compare current token costs across frontier models. Free, from FernAI.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b1120'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%23dc2626' font-family='Georgia,serif'%3Ef%3C/text%3E%3C/svg%3E">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
+<script>
+  // Before first paint, so the page never flashes the wrong theme or chrome.
+  // Light is the brand default and carries no attribute; dark is stamped.
+  // ?theme= wins over the saved choice so a host page can pin the theme, and
+  // ?embed=1 drops the header and footer for use inside an iframe.
+  (function () {
+    var root = document.documentElement;
+    var params = new URLSearchParams(location.search);
+    var theme = params.get("theme");
+    if (theme !== "light" && theme !== "dark") {
+      try { theme = localStorage.getItem("fernai-roi-calc-theme"); } catch (_) { theme = null; }
+    }
+    if (theme === "dark") root.setAttribute("data-theme", "dark");
+    if (params.get("embed") === "1") root.setAttribute("data-embed", "");
+  })();
+</script>
 </head>
 <body>
-<div class="wrap">
 
-  <header class="page-head">
-    <div class="brand">FernAI &middot; <a href="https://fernai.uk" target="_blank" rel="noopener">fernai.uk</a></div>
-    <button class="theme-toggle" id="theme-toggle" type="button">Light mode</button>
-  </header>
-
-  <h1 class="title">AI ROI Calculator</h1>
-  <p class="subtitle">
-    Estimate the monthly value of AI-assisted work against what it actually costs
-    to run, using live API token pricing for Claude, GPT, Gemini, Grok and Llama.
-    Adjust the numbers on the left to match your team.
-  </p>
-
-  <div class="layout">
-    <!-- INPUTS -->
-    <div class="panel">
-      <h2 class="panel-head">Your team</h2>
-      <div class="panel-rule"></div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="team-size">Team size <span class="val" id="team-size-val">10</span></label>
-          <input type="number" id="team-size" min="1" max="5000" value="10">
-        </div>
-        <div class="field">
-          <label for="hourly-cost">Hourly cost <span class="val" id="hourly-cost-val">£45</span></label>
-          <input type="number" id="hourly-cost" min="1" step="1" value="45">
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="currency">Currency</label>
-        <select id="currency">
-          <option value="GBP" selected>£ GBP</option>
-          <option value="USD">$ USD</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="hours-week">Hours/week per person on AI-assisted tasks <span class="val" id="hours-week-val">8</span></label>
-        <input type="range" id="hours-week" min="1" max="40" step="0.5" value="8">
-      </div>
-
-      <div class="field">
-        <label for="efficiency">Time saved on those tasks <span class="val" id="efficiency-val">30%</span></label>
-        <input type="range" id="efficiency" min="5" max="80" step="5" value="30">
-      </div>
-
-      <div class="field-group-head">AI usage</div>
-
-      <div class="field">
-        <label for="model">Model</label>
-        <select id="model"></select>
-      </div>
-
-      <div class="field-row">
-        <div class="field">
-          <label for="input-tokens">Avg input tokens / task</label>
-          <input type="number" id="input-tokens" min="0" step="100" value="3000">
-        </div>
-        <div class="field">
-          <label for="output-tokens">Avg output tokens / task</label>
-          <input type="number" id="output-tokens" min="0" step="100" value="800">
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="interactions-week">AI tasks / person / week <span class="val" id="interactions-week-val">25</span></label>
-        <input type="range" id="interactions-week" min="1" max="200" step="1" value="25">
-      </div>
-
-      <div class="field">
-        <label for="seat-cost">Extra flat monthly cost (seats, subscriptions)</label>
-        <input type="number" id="seat-cost" min="0" step="10" value="0">
-      </div>
-
-      <p class="panel-note">All figures are estimates for illustration, not a quote. Token prices are list prices with no volume discount.</p>
+<header class="appbar">
+  <div class="container appbar-in">
+    <a class="lockup" href="https://fernai.co.uk/" aria-label="FernAI home">
+      <svg class="lockup-mark" viewBox="0 0 342 87" role="img" aria-label="FernAI" focusable="false">
+        <path fill="currentColor" d="M65.0596 38.0703C70.4496 25.3003 82.93 18.1199 96.6699 19.0898V19.1104C117.42 20.5704 126.92 38.7603 125.02 58.7803H80.3203C81.6404 66.1101 87.2705 70.9695 94.3604 71.2695C100.71 71.7694 106.451 69.8501 111.44 64.7002L122.08 73.9805C117.34 79.8103 111.11 83.8003 103.67 85.2402C86.32 88.6002 69.1803 80.9099 63.8203 64C61.0904 55.3701 61.5797 46.3202 65.0596 38.0703ZM148.15 32.6904C152.56 23.5104 158.44 18.5204 168.65 19.1104V38.1504C155.47 37.9704 149.2 45.2804 148.15 58.1904L148.12 84.5195V84.5098L129.81 84.5703V20.2695H148.1L148.15 32.6904ZM192.43 25.25C197.09 20.4401 203.31 18.6302 209.93 19.1201C222.28 20.0301 229.02 29.2302 229.43 41.4102V84.5703L211.12 84.5498V46.9297C210.68 43.7498 210.13 40.4401 207.43 38.1602L207.45 38.1504C203.32 34.6604 196.91 34.85 192.84 38.04C190.04 40.23 189.19 43.5803 188.79 47.0303V84.54H170.46V20.2998L188.75 20.25L188.83 28.96L192.43 25.25ZM319.93 84.5L300.55 84.5703L292.9 65.7402V65.75L257.45 65.7197L249.75 84.5703L230.86 84.5195L266.81 0.0302734L283.96 0L319.93 84.5ZM341.96 84.5303L323.52 84.5498V0.629883L341.96 0.580078V84.5303ZM63.9902 17.3799L18.4502 17.3896L18.4404 35.2695H58.4902L58.5703 52.0498L18.4404 52.04V84.54H0V0.589844H63.9697L63.9902 17.3799ZM264.04 49.4199L286.27 49.3896L275.15 22.3203L264.04 49.4199ZM102.26 36.5596C97.8699 33.1299 91.5801 32.6699 86.8203 35.7695C82.8104 38.3795 80.7202 42.8099 80.1602 47.3799L80.1699 47.3701H107.38C106.93 42.8501 105.26 39.3896 102.26 36.5596Z"/>
+      </svg>
+      <span class="lockup-sub">ROI Calculator</span>
+    </a>
+    <div class="appbar-right">
+      <span class="appbar-note">Free tool</span>
+      <button class="navbtn" id="theme-toggle" type="button">Dark theme</button>
     </div>
+  </div>
+</header>
 
-    <!-- RESULTS -->
-    <div class="results-col">
-      <div class="panel">
-        <h2 class="panel-head">Estimated monthly outcome</h2>
-        <div class="panel-rule"></div>
+<main class="main">
+  <div class="container">
 
-        <div class="stat-row">
-          <div class="stat-tile hero" id="net-value-tile">
-            <div>
-              <div class="stat-label">Net monthly value</div>
-              <div class="stat-figure" id="net-value">—</div>
+    <p class="eyebrow">AI ROI Calculator</p>
+    <h1 class="screen-title">What is AI actually worth to your team?</h1>
+    <p class="screen-sub">
+      Estimate the monthly value of AI-assisted work against what it costs to run,
+      using current API token pricing for Claude, GPT, Gemini, Grok and Llama.
+      Adjust the inputs to match your team.
+    </p>
+    <div class="rule-2"></div>
+
+    <div class="layout">
+      <!-- INPUTS -->
+      <section class="card inputs" aria-labelledby="inputs-head">
+        <h2 class="kicker" id="inputs-head">Your team</h2>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="team-size">Team size <span class="val" id="team-size-val">10</span></label>
+            <input type="number" id="team-size" min="1" max="5000" value="10" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label for="hourly-cost">Hourly cost <span class="val" id="hourly-cost-val">£45</span></label>
+            <input type="number" id="hourly-cost" min="1" step="1" value="45" inputmode="decimal">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="currency">Currency</label>
+          <select id="currency">
+            <option value="GBP" selected>£ GBP</option>
+            <option value="USD">$ USD</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="hours-week">Hours / week per person on AI-assisted tasks <span class="val" id="hours-week-val">8</span></label>
+          <input type="range" id="hours-week" min="1" max="40" step="0.5" value="8">
+        </div>
+
+        <div class="field">
+          <label for="efficiency">Time saved on those tasks <span class="val" id="efficiency-val">30%</span></label>
+          <input type="range" id="efficiency" min="5" max="80" step="5" value="30">
+        </div>
+
+        <h2 class="kicker group-head">AI usage</h2>
+
+        <div class="field">
+          <label for="model">Model</label>
+          <select id="model"></select>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="input-tokens">Input tokens / task</label>
+            <input type="number" id="input-tokens" min="0" step="100" value="3000" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label for="output-tokens">Output tokens / task</label>
+            <input type="number" id="output-tokens" min="0" step="100" value="800" inputmode="numeric">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="interactions-week">AI tasks / person / week <span class="val" id="interactions-week-val">25</span></label>
+          <input type="range" id="interactions-week" min="1" max="200" step="1" value="25">
+        </div>
+
+        <div class="field">
+          <label for="seat-cost">Extra flat monthly cost (seats, subscriptions)</label>
+          <input type="number" id="seat-cost" min="0" step="10" value="0" inputmode="decimal">
+        </div>
+
+        <p class="note">All figures are estimates for illustration, not a quote. Token prices are list prices with no volume discount.</p>
+      </section>
+
+      <!-- RESULTS -->
+      <div class="results">
+        <section aria-labelledby="outcome-head">
+          <h2 class="section-head" id="outcome-head">Estimated monthly outcome</h2>
+
+          <div class="hero" id="net-value-tile" aria-live="polite">
+            <p class="micro">Net monthly value</p>
+            <div class="hero-figure" id="net-value">—</div>
+            <p class="hero-sub" id="roi-pct">ROI —</p>
+          </div>
+
+          <div class="stat-strip">
+            <div class="stat-cell">
+              <p class="micro">Value of time saved</p>
+              <div class="stat-num" id="monthly-value">—</div>
             </div>
-            <div class="stat-sub" id="roi-pct">ROI —</div>
+            <div class="stat-cell">
+              <p class="micro">Monthly AI cost</p>
+              <div class="stat-num" id="monthly-cost">—</div>
+            </div>
+            <div class="stat-cell">
+              <p class="micro">Hours saved / month</p>
+              <div class="stat-num" id="hours-saved">—</div>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div class="stat-row">
-          <div class="stat-tile">
-            <div class="stat-label">Value of time saved</div>
-            <div class="stat-figure value" id="monthly-value">—</div>
+        <section class="section" aria-labelledby="bars-head">
+          <h2 class="section-head" id="bars-head">Monthly AI cost by model</h2>
+          <p class="section-note">Same task volume as above, priced across each model. Cheapest first; your selected model is marked in red.</p>
+          <div class="legend-row">
+            <span><span class="legend-swatch flagship"></span>Flagship tier</span>
+            <span><span class="legend-swatch efficient"></span>Efficient tier</span>
           </div>
-          <div class="stat-tile">
-            <div class="stat-label">Monthly AI cost</div>
-            <div class="stat-figure cost" id="monthly-cost">—</div>
+          <div class="bar-list" id="bar-list">
+            <div class="loading">Loading current pricing…</div>
           </div>
-          <div class="stat-tile">
-            <div class="stat-label">Hours saved / month</div>
-            <div class="stat-figure" id="hours-saved">—</div>
-          </div>
-        </div>
-      </div>
+        </section>
 
-      <div class="panel">
-        <h2 class="panel-head">Monthly AI cost by model</h2>
-        <div class="panel-rule"></div>
-        <p class="panel-note">Same task volume as above, priced across each model. Sorted cheapest first.</p>
-        <div class="legend-row">
-          <span><span class="legend-swatch" style="background:var(--data-cost)"></span>Flagship tier</span>
-          <span><span class="legend-swatch" style="background:var(--data-cost-tint)"></span>Efficient tier</span>
-        </div>
-        <div class="bar-list" id="bar-list">
-          <div class="loading-note">Loading live pricing…</div>
-        </div>
+        <section class="cta" aria-labelledby="cta-head">
+          <p class="kicker">From estimate to evidence</p>
+          <h2 class="cta-title" id="cta-head">This is a model. FernAI measures the real thing.</h2>
+          <p class="cta-body">
+            We help organisations prove the financial return of their AI investment, with an
+            auditable ledger that traces every figure back to the source data.
+          </p>
+          <a class="act primary" href="https://fernai.co.uk/" target="_top">Talk to FernAI <span class="arrow" aria-hidden="true">→</span></a>
+        </section>
       </div>
     </div>
-  </div>
 
-  <div class="foot">
-    <span id="price-source">Pricing source loading…</span>
-    <span>Built by <a href="https://fernai.uk" target="_blank" rel="noopener">FernAI</a> — AI ROI measurement for teams that need the evidence, not just the vibe.</span>
+    <p class="source-line" id="price-source">Loading pricing source…</p>
   </div>
+</main>
 
-</div>
+<footer class="appfoot">
+  <div class="container appfoot-in">
+    <span>© <span id="year">2026</span> FernAI · AI Value Measurement</span>
+    <span class="appfoot-links">
+      <a href="https://fernai.co.uk/" target="_top">fernai.co.uk</a>
+      <a href="https://fernai.co.uk/privacy-policy/" target="_top">Privacy notice</a>
+      <a href="https://fernai.co.uk/website-terms/" target="_top">Website terms</a>
+    </span>
+  </div>
+</footer>
+
 <script src="js/app.js"></script>
 </body>
 </html>
