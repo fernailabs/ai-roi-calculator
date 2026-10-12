@@ -13,6 +13,11 @@
 <meta property="og:locale" content="en_GB">
 <meta name="twitter:card" content="summary">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<!-- "Describe your team" assistant. Leave the URL empty to hide the panel;
+     set it to the Cloud Run service's URL to switch it on (see server/README.md).
+     The Turnstile site key is optional and only used if the service requires it. -->
+<meta name="fernai-assistant-url" content="">
+<meta name="fernai-turnstile-sitekey" content="">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -58,15 +63,48 @@
     <h1 class="screen-title">What is AI actually worth to your team?</h1>
     <p class="screen-sub">
       Estimate the monthly value of AI-assisted work against what it costs to run,
-      using current API token pricing for Claude, GPT, Gemini, Grok and Llama.
+      whether you buy seats for your team or pay per use for Claude, GPT, Gemini, Grok or Llama.
       Adjust the inputs to match your team.
     </p>
     <div class="rule-2"></div>
+
+    <section class="assistant" id="assistant" aria-labelledby="assistant-head" hidden>
+      <div class="assistant-in">
+        <div>
+          <p class="kicker" id="assistant-head">Not sure where to start?</p>
+          <h2 class="assistant-title">Describe your team and we'll fill in the calculator</h2>
+          <p class="hint">Who they are, roughly how many, and what work takes up their week. Don't include names or anything confidential. Your description is sent to an AI model to suggest figures; it isn't stored.</p>
+        </div>
+        <form class="assistant-form" id="assistant-form">
+          <label class="visually-hidden" for="assistant-text">Describe your team</label>
+          <textarea id="assistant-text" rows="4" maxlength="1200" placeholder="For example: 12 people in customer support handling about 400 tickets a week, mostly by email, plus writing help-centre articles."></textarea>
+          <div class="assistant-actions">
+            <div id="turnstile" class="turnstile"></div>
+            <button type="submit" class="act primary" id="assistant-submit">Fill in the calculator <span class="arrow" aria-hidden="true">→</span></button>
+            <span class="assistant-status" id="assistant-status" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+        <div class="assistant-result" id="assistant-result" hidden>
+          <p class="micro">What we assumed</p>
+          <p class="assistant-summary" id="assistant-summary"></p>
+          <ul id="assistant-reasons"></ul>
+          <p class="hint">These are starting points. Adjust anything below that doesn't match your team.</p>
+        </div>
+      </div>
+    </section>
 
     <div class="layout">
       <!-- INPUTS -->
       <section class="card inputs" aria-labelledby="inputs-head">
         <h2 class="kicker" id="inputs-head">Your team</h2>
+
+        <div class="field">
+          <label for="role">Start from a role</label>
+          <select id="role" aria-describedby="role-hint">
+            <option value="">Choose a role…</option>
+          </select>
+          <p class="hint" id="role-hint">Fills in typical figures for that kind of team, which you can then adjust.</p>
+        </div>
 
         <div class="field">
           <label for="team-size">People using AI</label>
@@ -105,37 +143,76 @@
           <p class="hint" id="efficiency-hint"><span id="efficiency-example">At 30%, a 10-hour task takes 7 hours.</span> Start cautious: early gains are often smaller than expected.</p>
         </div>
 
-        <h2 class="kicker group-head">AI usage</h2>
+        <h2 class="kicker group-head">How you'll pay for AI</h2>
 
-        <div class="field">
-          <label for="model">AI model</label>
-          <select id="model" aria-describedby="model-hint"></select>
-          <p class="hint" id="model-hint">Used for the cost figures. Every model is compared in the chart.</p>
-        </div>
+        <fieldset class="segmented" aria-describedby="access-hint">
+          <legend class="visually-hidden">How you'll pay for AI</legend>
+          <label><input type="radio" name="access" value="seats" checked> <span>Per-seat subscription</span></label>
+          <label><input type="radio" name="access" value="api"> <span>Pay as you go</span></label>
+        </fieldset>
+        <p class="hint" id="access-hint">Most teams buy a plan such as ChatGPT, Claude or Copilot per person. Pay as you go means paying per use through an AI provider's API, usually for tools you build or buy on top of it.</p>
 
-        <div class="field">
-          <label for="interactions-week">AI requests per person per week <span class="val" id="interactions-week-val">25</span></label>
-          <input type="range" id="interactions-week" min="1" max="200" step="1" value="25" aria-describedby="interactions-week-hint">
-          <p class="hint" id="interactions-week-hint">Each prompt sent to the AI counts as one. 25 a week is about five a day.</p>
-        </div>
-
-        <div class="field-row">
+        <div data-mode="seats">
           <div class="field">
-            <label for="input-tokens">Text sent per request</label>
-            <div class="input-unit">
-              <input type="number" id="input-tokens" min="0" step="100" value="3000" inputmode="numeric" aria-describedby="tokens-hint">
-              <span class="unit-suffix" aria-hidden="true">tokens</span>
-            </div>
+            <label for="plan">Plan</label>
+            <select id="plan" aria-describedby="plan-hint"></select>
+            <p class="hint" id="plan-hint"></p>
           </div>
-          <div class="field">
-            <label for="output-tokens">Text received per request</label>
+          <div class="field" id="custom-plan-field" hidden>
+            <label for="custom-plan-price">Price per person per month</label>
             <div class="input-unit">
-              <input type="number" id="output-tokens" min="0" step="100" value="800" inputmode="numeric" aria-describedby="tokens-hint">
-              <span class="unit-suffix" aria-hidden="true">tokens</span>
+              <span class="unit-prefix" id="custom-plan-sym" aria-hidden="true">£</span>
+              <input type="number" id="custom-plan-price" min="0" step="1" value="20" inputmode="decimal">
+              <span class="unit-suffix" aria-hidden="true">per seat</span>
             </div>
           </div>
         </div>
-        <p class="hint field-row-hint" id="tokens-hint">AI is priced per token, roughly ¾ of a word. "Sent" is your prompt plus any documents or context you include; "received" is the AI's reply. 1,000 tokens is about 750 words, or a page and a half.</p>
+
+        <div data-mode="api" hidden>
+          <div class="field">
+            <label for="model">AI model</label>
+            <select id="model" aria-describedby="model-hint"></select>
+            <p class="hint" id="model-hint">Used for the cost figures. Every model is compared in the chart.</p>
+          </div>
+
+          <fieldset class="field tasks" id="tasks" aria-describedby="tasks-hint">
+            <legend>What will they use it for?</legend>
+            <p class="hint" id="tasks-hint">Tick everything that applies. Each kind of work comes with typical usage, so you don't need to know about tokens.</p>
+            <div id="task-list"></div>
+          </fieldset>
+
+          <p class="usage-summary" id="usage-summary"></p>
+
+          <div class="field manual">
+            <label class="check"><input type="checkbox" id="manual-usage"> <span>I know our usage: enter figures myself</span></label>
+          </div>
+
+          <div id="manual-fields" hidden>
+            <div class="field">
+              <label for="interactions-week">AI requests per person per week <span class="val" id="interactions-week-val">25</span></label>
+              <input type="range" id="interactions-week" min="1" max="300" step="1" value="25" aria-describedby="interactions-week-hint">
+              <p class="hint" id="interactions-week-hint">Each prompt sent to the AI counts as one. 25 a week is about five a day.</p>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="input-tokens">Text sent per request</label>
+                <div class="input-unit">
+                  <input type="number" id="input-tokens" min="0" step="100" value="3000" inputmode="numeric" aria-describedby="tokens-hint">
+                  <span class="unit-suffix" aria-hidden="true">tokens</span>
+                </div>
+              </div>
+              <div class="field">
+                <label for="output-tokens">Text received per request</label>
+                <div class="input-unit">
+                  <input type="number" id="output-tokens" min="0" step="100" value="800" inputmode="numeric" aria-describedby="tokens-hint">
+                  <span class="unit-suffix" aria-hidden="true">tokens</span>
+                </div>
+              </div>
+            </div>
+            <p class="hint field-row-hint" id="tokens-hint">AI is priced per token, roughly ¾ of a word. "Sent" is your prompt plus any documents or context you include; "received" is the AI's reply. 1,000 tokens is about 750 words, or a page and a half.</p>
+          </div>
+        </div>
 
         <div class="field">
           <label for="seat-cost">Other monthly AI costs</label>
@@ -144,10 +221,10 @@
             <input type="number" id="seat-cost" min="0" step="10" value="0" inputmode="decimal" aria-describedby="seat-cost-hint">
             <span class="unit-suffix" aria-hidden="true">per month</span>
           </div>
-          <p class="hint" id="seat-cost-hint">Fixed costs on top of usage, such as licences or subscriptions (<span id="seat-cost-example">10 seats at £25 is £250</span>), or support you want to spread across the month.</p>
+          <p class="hint" id="seat-cost-hint">Anything else you pay each month for AI, such as other tools, or support and training you want to spread across the month.</p>
         </div>
 
-        <p class="note">All figures are estimates for illustration, not a quote. Token prices are providers' list prices, with no volume discount.</p>
+        <p class="note">All figures are estimates for illustration, not a quote. Prices are list prices, with no volume discount.</p>
       </section>
 
       <!-- RESULTS -->
@@ -170,7 +247,7 @@
             <div class="stat-cell">
               <p class="micro">Monthly AI cost</p>
               <div class="stat-num" id="monthly-cost">—</div>
-              <p class="stat-hint">Usage plus other costs</p>
+              <p class="stat-hint" id="monthly-cost-hint">Seats plus other costs</p>
             </div>
             <div class="stat-cell">
               <p class="micro">Hours saved a month</p>
@@ -184,7 +261,8 @@
             <ul>
               <li><strong>Hours saved</strong> = people × hours a week on AI-suited tasks × how much faster AI makes them × 4.345 weeks a month.</li>
               <li><strong>Value of time saved</strong> = hours saved × cost of one hour. This is time freed up, not cash saved: it becomes value when the team spends it on other work.</li>
-              <li><strong>Monthly AI cost</strong> = people × requests a week × 4.345 × (tokens sent × input price + tokens received × output price), plus other monthly costs.</li>
+              <li><strong>Monthly AI cost</strong>, per-seat subscription = people × the plan's price per seat, plus other monthly costs.</li>
+              <li><strong>Monthly AI cost</strong>, pay as you go = for each kind of work ticked, people × requests a week × 4.345 × (tokens sent × input price + tokens received × output price), plus other monthly costs. The usage behind each kind of work is an estimate; tick "enter figures myself" to use your own.</li>
               <li><strong>Benefit after AI costs</strong> = value of time saved − monthly AI cost.</li>
             </ul>
             <p>It leaves out one-off costs such as rollout and training, and the time it takes a team to get up to speed.</p>
@@ -192,9 +270,9 @@
         </section>
 
         <section class="section" aria-labelledby="bars-head">
-          <h2 class="section-head" id="bars-head">Monthly AI cost by model</h2>
-          <p class="section-note">What the same usage would cost each month on each model, cheapest first. Your chosen model is in red. Flagship models are the most capable; efficient models are cheaper and faster, and are often good enough for routine work.</p>
-          <div class="legend-row">
+          <h2 class="section-head" id="bars-head">Monthly AI cost by plan</h2>
+          <p class="section-note" id="bars-note"></p>
+          <div class="legend-row" id="bars-legend">
             <span><span class="legend-swatch flagship"></span>Flagship tier</span>
             <span><span class="legend-swatch efficient"></span>Efficient tier</span>
           </div>
@@ -230,6 +308,7 @@
   </div>
 </footer>
 
+<script src="js/calc.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
