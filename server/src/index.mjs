@@ -21,7 +21,7 @@ const preview = env.PREVIEW === "1";
 const config = {
   model: env.CLAUDE_MODEL || "claude-opus-5-5",
   effort: env.CLAUDE_EFFORT || "medium",
-  allowedOrigins: (env.ALLOWED_ORIGINS || "https://fernai.co.uk,https://www.fernai.co.uk,https://fernailabs.github.io")
+  allowedOrigins: (env.ALLOWED_ORIGINS || "https://fernai.co.uk,https://www.fernai.co.uk,https://roi.fernai.co.uk,https://fernailabs.github.io")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),

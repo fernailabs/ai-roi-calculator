@@ -147,7 +147,7 @@ running it, e.g. `CLAUDE_EFFORT=low ./server/deploy.sh`.
 |---|---|---|
 | `CLAUDE_MODEL` | `claude-opus-5-5` | Model used for estimates. |
 | `CLAUDE_EFFORT` | `medium` | `low` is faster and cheaper; `high` thinks harder. |
-| `ALLOWED_ORIGINS` | fernai.co.uk, www.fernai.co.uk, fernailabs.github.io | Sites allowed to call the service. Add the domain the calculator is embedded on if it's different. |
+| `ALLOWED_ORIGINS` | fernai.co.uk, www.fernai.co.uk, roi.fernai.co.uk, fernailabs.github.io | Sites allowed to call the service. Add any other address the calculator is served from. |
 | `RATE_PER_MINUTE` | `3` | Requests per visitor (IP address) per minute. |
 | `RATE_PER_DAY` | `15` | Requests per visitor per day. |
 | `DAILY_REQUEST_LIMIT` | `500` | Requests across all visitors per day, per instance; after that the panel says to fill the form in by hand. |

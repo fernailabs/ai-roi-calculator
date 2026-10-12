@@ -48,10 +48,38 @@ wordmark. Light is the default theme; dark is a toggle. Copy is British English.
 If the brand tokens change there, copy the `:root` and `[data-theme="dark"]`
 blocks at the top of `css/styles.css` across.
 
-## Embedding on fernai.co.uk
+## Linking from fernai.co.uk (recommended)
 
-The page can be linked to directly, or embedded in an iframe on any page of
-the website. Query parameters:
+fernai.co.uk's managed WordPress strips `<script>` tags, so an embedded frame
+can't resize to fit the calculator and shows empty space or cuts it off.
+Instead, the WordPress page introduces the calculator and links to it
+full-page, where it works on every screen size. Paste into a Custom HTML
+block:
+
+```html
+<p><a href="https://roi.fernai.co.uk/"
+      style="display:inline-block;background:#ec3013;color:#fff;padding:14px 22px;
+             font-weight:700;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none">
+  Open the AI ROI calculator &rarr;</a></p>
+```
+
+### Serving it at roi.fernai.co.uk
+
+1. In the DNS for fernai.co.uk, add a `CNAME` record: name `roi`, value
+   `fernailabs.github.io`.
+2. In this repository on GitHub, **Settings → Pages → Custom domain**, enter
+   `roi.fernai.co.uk` and save. Once the DNS check passes (minutes to a few
+   hours), tick **Enforce HTTPS**.
+3. The assistant service already allows `https://roi.fernai.co.uk`.
+
+GitHub then redirects `fernailabs.github.io/ai-roi-calculator/` to the new
+address, so existing links keep working. Until the domain is set up, link to
+`https://fernailabs.github.io/ai-roi-calculator/` instead.
+
+## Embedding in other sites
+
+Where the host page can run a script, the calculator can also be embedded in
+an iframe. Query parameters:
 
 | Parameter     | Effect                                                          |
 |---------------|-----------------------------------------------------------------|
