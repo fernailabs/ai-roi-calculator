@@ -6,6 +6,11 @@
 <title>AI ROI Calculator | FernAI</title>
 <meta name="description" content="Free AI ROI calculator from FernAI. Estimate the monthly return on adopting AI tools for your team, and compare current API token costs across Claude, GPT, Gemini, Grok and Llama.">
 <meta name="theme-color" content="#0f172a">
+<!-- Only the calculator's own scripts may run (plus Cloudflare Turnstile if
+     it's switched on), and it may only talk to its own data and the
+     assistant on Cloud Run. The sha256 is of the inline script below; if you
+     edit that script, update the hash (server/test/server.test.mjs checks it). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-PNVx3VJuVgikb9UX2hA47V0Jfv3RDWHAq1NP3fgV88c=' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.run.app; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta property="og:site_name" content="FernAI">
 <meta property="og:title" content="AI ROI Calculator | FernAI">
 <meta property="og:description" content="Estimate the monthly return on adopting AI tools for your team, and compare current token costs across frontier models. Free, from FernAI.">

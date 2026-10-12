@@ -277,3 +277,24 @@ test("cost uses the price list and counts thinking as output", () => {
   assert.equal(costUsd(prices, "unknown", { input_tokens: 1 }), null);
   assert.equal(costUsd(null, "claude-opus-5-5", { input_tokens: 1 }), null);
 });
+
+test("client address comes from the last forwarded entry, which a caller can't forge", async () => {
+  const { clientIp } = await import("../src/guards.mjs");
+  const req = (xff) => ({ headers: xff === undefined ? {} : { "x-forwarded-for": xff }, socket: { remoteAddress: "10.0.0.1" } });
+  assert.equal(clientIp(req("203.0.113.7")), "203.0.113.7");
+  assert.equal(clientIp(req("1.2.3.4, 203.0.113.7")), "203.0.113.7", "a spoofed first entry is ignored");
+  assert.equal(clientIp(req("")), "10.0.0.1");
+  assert.equal(clientIp(req(undefined)), "10.0.0.1");
+});
+
+test("the page's security policy allows its inline script and the assistant", async () => {
+  const { createHash } = await import("node:crypto");
+  const html = await readFile(new URL("../../index.html", import.meta.url), "utf8");
+  const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+  const inline = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  assert.equal(inline.length, 1, "one inline script, covered by a hash");
+  const hash = createHash("sha256").update(inline[0]).digest("base64");
+  assert.ok(csp.includes(`'sha256-${hash}'`), "update the sha256 in index.html's CSP after editing its inline script");
+  const assistantUrl = html.match(/name="fernai-assistant-url" content="([^"]*)"/)[1];
+  if (assistantUrl) assert.ok(new URL(assistantUrl).hostname.endsWith(".run.app") && csp.includes("https://*.run.app"));
+});

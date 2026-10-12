@@ -150,7 +150,7 @@ running it, e.g. `CLAUDE_EFFORT=low ./server/deploy.sh`.
 | `ALLOWED_ORIGINS` | fernai.co.uk, www.fernai.co.uk, roi.fernai.co.uk, fernailabs.github.io | Sites allowed to call the service. Add any other address the calculator is served from. |
 | `RATE_PER_MINUTE` | `3` | Requests per visitor (IP address) per minute. |
 | `RATE_PER_DAY` | `15` | Requests per visitor per day. |
-| `DAILY_REQUEST_LIMIT` | `500` | Requests across all visitors per day, per instance; after that the panel says to fill the form in by hand. |
+| `DAILY_REQUEST_LIMIT` | `100` | Requests across all visitors per day, per instance; after that the panel says to fill the form in by hand. |
 | `TURNSTILE` | `0` | `1` requires a Cloudflare Turnstile check (see below). |
 | `PREVIEW` | `0` | `1` deploys the private `fernai-roi-assistant-preview` service, which also serves the page and accepts any origin. |
 
@@ -159,13 +159,11 @@ two instances, so the effective limits are at most double the figures above.
 
 ## Cost
 
-Each estimate sends roughly 1,600 tokens and gets back a few hundred, plus
-the model's thinking. On Claude Opus 5.5 ($4 in / $20 out per million tokens)
-that is roughly **$0.03 to $0.06 per estimate**: about $30 to $60 for 1,000
-visitors who use it. The default daily cap of 500 per instance bounds the
-worst case at about $30 to $60 a day. These are estimates; the service logs
-`input_tokens` and `output_tokens` for every request, so check the real figures
-in Cloud Logging after launch.
+Measured at launch (October 2026, Claude Opus 5.5 at medium effort): about
+2,250 tokens in and 600 out per estimate, **about $0.021 each**, taking 8 to
+9 seconds. That's about $21 per 1,000 visitors who use the assistant. The
+default daily cap of 100 per instance, at most two instances, bounds the
+worst case at about $4 a day. `./server/costs.sh` shows the current figures.
 
 To spend less, set `CLAUDE_EFFORT=low`, or `CLAUDE_MODEL=claude-sonnet-5-5`
 ($2 / $10 per million tokens, roughly half the cost). Cloud Run itself scales
