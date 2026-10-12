@@ -400,7 +400,7 @@ fieldset:disabled .task { opacity: 0.45; }
 :root[data-embed] .appbar,
 :root[data-embed] .appfoot { display: none; }
 :root[data-embed] body { min-height: 0; }
-:root[data-embed] .main { padding: 24px 0 32px; }
+:root[data-embed] .main { padding: 40px 0 32px; }
 
 /* ---- panel embed (?embed=panel) ---------------------------------------------
    For host pages that strip scripts and so can't resize the frame: the host

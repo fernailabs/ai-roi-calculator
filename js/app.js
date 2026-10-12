@@ -431,9 +431,19 @@
       $("outcome-head").scrollIntoView({ behavior: "smooth", block: "start" });
     });
     if (!("IntersectionObserver" in window)) return;
+    // Only once the visitor has scrolled away from the top: on a short frame
+    // the result can start below the fold, and a bar there would cover the
+    // calculator's heading.
+    const SCROLLED = 160;
+    let resultVisible = true;
+    const update = () => {
+      els.miniSummary.classList.toggle("show", !resultVisible && window.scrollY > SCROLLED);
+    };
     new IntersectionObserver(([entry]) => {
-      els.miniSummary.classList.toggle("show", !entry.isIntersecting);
+      resultVisible = entry.isIntersecting;
+      update();
     }).observe(els.netValueTile);
+    window.addEventListener("scroll", update, { passive: true });
   }
 
   // ---- assistant ("Describe your team") --------------------------------------------
