@@ -173,6 +173,22 @@ input, select, button { font-family: inherit; }
 }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .field-row .field label { min-height: 2.6em; align-items: flex-end; }
+.field-row .field { margin-bottom: 8px; }
+
+.hint { font-size: 12.5px; line-height: 1.5; color: var(--app-faint); margin: 7px 0 0; }
+.field-row-hint { margin: 0 0 18px; }
+
+/* Number input with a currency symbol and/or unit drawn inside the box. */
+.input-unit {
+  display: flex; align-items: center;
+  background: var(--app-panel-2); border: 1px solid var(--app-line-soft);
+}
+.input-unit:focus-within { border-color: var(--app-accent); }
+.input-unit input[type="number"] { border: 0; background: transparent; min-width: 0; flex: 1; }
+.input-unit input[type="number"]:focus { border: 0; }
+.unit-prefix, .unit-suffix { color: var(--app-faint); font-size: 13px; white-space: nowrap; }
+.unit-prefix { padding-left: 14px; margin-right: -8px; color: var(--app-muted); font-size: 15px; }
+.unit-suffix { padding-right: 14px; }
 
 input[type="range"] { accent-color: var(--app-accent); width: 100%; margin: 4px 0 0; }
 input[type="number"], select {
@@ -224,6 +240,19 @@ select option { background: var(--app-panel-2); color: var(--app-ink); }
   font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; letter-spacing: -0.03em;
   margin-top: 6px; font-variant-numeric: tabular-nums;
 }
+.stat-hint { font-size: 12px; color: var(--app-faint); margin: 4px 0 0; }
+
+.method { margin-top: 16px; font-size: 13px; color: var(--app-muted); }
+.method summary {
+  cursor: pointer; font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--app-ink);
+}
+.method summary:hover { color: var(--app-accent-ink); }
+.method ul { margin: 12px 0 0; padding-left: 18px; }
+.method li { margin-bottom: 6px; }
+.method p { margin: 10px 0 0; }
+.method strong { color: var(--app-ink); font-weight: 600; }
+
 @media (max-width: 560px) {
   .stat-strip { grid-template-columns: 1fr; }
   .stat-cell { border-left: 0; border-top: 1px solid var(--app-line-soft); }
