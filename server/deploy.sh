@@ -38,11 +38,17 @@ fi
 
 # A preview accepts requests from any origin, so it is never public: only
 # accounts with Cloud Run Invoker (you, as project owner) can reach it.
+#
+# The public service turns off Cloud Run's invoker check rather than granting
+# "allUsers" access: Google Cloud organisations created since 2024 block
+# allUsers by default (domain restricted sharing), and when they do,
+# --allow-unauthenticated only warns and leaves the service private, so
+# browsers get "Failed to fetch".
 if [[ "$PREVIEW" == "1" ]]; then
-  access="--no-allow-unauthenticated"
+  access=(--invoker-iam-check --no-allow-unauthenticated)
   echo "Deploying a PRIVATE preview of $SERVICE to $GCP_PROJECT ($REGION)."
 else
-  access="--allow-unauthenticated"
+  access=(--no-invoker-iam-check)
   echo "Deploying $SERVICE to $GCP_PROJECT ($REGION) as a PUBLIC API for: $origins"
 fi
 
@@ -50,7 +56,7 @@ gcloud run deploy "$SERVICE" \
   --project "$GCP_PROJECT" \
   --region "$REGION" \
   --source . \
-  "$access" \
+  "${access[@]}" \
   --service-account "$SA" \
   --set-env-vars "$env_vars" \
   --set-secrets "$secrets" \
@@ -72,8 +78,15 @@ Costs per estimate:  ./server/costs.sh
 MSG
 else
   echo "Deployed at $url"
-  echo -n "Health check: "
-  curl -s --max-time 30 "$url/api/health" || echo "no response"
+  echo -n "Health check:          "
+  curl -s --max-time 30 "$url/api/health" || echo -n "no response"
   echo
+  # The same preflight a browser sends before calling the API from the
+  # calculator page (the last allowed origin: the GitHub Pages address).
+  check_origin="${origins##*,}"
+  echo -n "Browser access check:  "
+  status="$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X OPTIONS "$url/api/estimate" \
+    -H "Origin: $check_origin" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type")"
+  if [[ "$status" == "204" ]]; then echo "OK (from $check_origin)"; else echo "FAILED (HTTP $status from $check_origin)"; fi
   echo "index.html's fernai-assistant-url meta tag must point at this service."
 fi
