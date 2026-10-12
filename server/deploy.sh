@@ -28,7 +28,7 @@ env_vars+=",RATE_PER_MINUTE=${RATE_PER_MINUTE:-3},RATE_PER_DAY=${RATE_PER_DAY:-1
 env_vars+=",PREVIEW=${PREVIEW}"
 # Commas separate --set-env-vars entries, so the origin list uses gcloud's
 # alternative-delimiter syntax (^;^) with semicolons between entries.
-origins="${ALLOWED_ORIGINS:-https://fernai.co.uk,https://www.fernai.co.uk,https://fernailabs.github.io}"
+origins="${ALLOWED_ORIGINS:-https://fernai.co.uk,https://www.fernai.co.uk,https://roi.fernai.co.uk,https://fernailabs.github.io}"
 env_vars="^;^${env_vars//,/;};ALLOWED_ORIGINS=${origins}"
 
 secrets="ANTHROPIC_API_KEY=anthropic-api-key:latest"
