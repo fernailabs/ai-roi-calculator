@@ -496,7 +496,11 @@
         applySuggestion(body);
         els.assistantStatus.textContent = "Done. We've filled in the calculator below.";
       } catch (err) {
-        els.assistantStatus.textContent = err.message || "Couldn't reach the assistant. Please try again.";
+        // A network or CORS failure surfaces as a TypeError ("Failed to
+        // fetch"), which means nothing to a visitor.
+        els.assistantStatus.textContent = err instanceof TypeError
+          ? "Couldn't reach the assistant just now. Please try again later, or fill in the calculator yourself."
+          : err.message || "Something went wrong. Please try again.";
       } finally {
         els.assistantSubmit.disabled = false;
         if (turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
