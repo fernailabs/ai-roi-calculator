@@ -3,20 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI ROI Calculator | FernAI</title>
-<meta name="description" content="Free AI ROI calculator from FernAI. Estimate the monthly return on adopting AI tools for your team, and compare current API token costs across Claude, GPT, Gemini, Grok and Llama.">
+<title>Free AI ROI Calculator for Teams | FernAI</title>
+<meta name="description" content="Estimate what AI could save your team each month. Compare ChatGPT, Claude, Copilot and Gemini costs against time saved. Free calculator from FernAI.">
 <meta name="theme-color" content="#0f172a">
 <!-- Only the calculator's own scripts may run (plus Cloudflare Turnstile if
      it's switched on), and it may only talk to its own data and the
      assistant on Cloud Run. The sha256 is of the inline script below; if you
      edit that script, update the hash (server/test/server.test.mjs checks it). -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-PNVx3VJuVgikb9UX2hA47V0Jfv3RDWHAq1NP3fgV88c=' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.run.app; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<!-- The calculator's home is the fernai.co.uk page that embeds it; point
+     search engines there so it, not this GitHub Pages copy, gets the credit. -->
+<link rel="canonical" href="https://fernai.co.uk/ai-roi-calculator/">
+<meta property="og:url" content="https://fernai.co.uk/ai-roi-calculator/">
 <meta property="og:site_name" content="FernAI">
-<meta property="og:title" content="AI ROI Calculator | FernAI">
-<meta property="og:description" content="Estimate the monthly return on adopting AI tools for your team, and compare current token costs across frontier models. Free, from FernAI.">
+<meta property="og:title" content="What is AI actually worth to your team?">
+<meta property="og:description" content="A free calculator from FernAI: time saved vs. what AI really costs, for your team.">
+<meta property="og:image" content="https://fernailabs.github.io/ai-roi-calculator/img/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="FernAI's free AI ROI calculator: what is AI actually worth to your team?">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_GB">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <!-- "Describe your team" assistant. Leave the URL empty to hide the panel;
      set it to the Cloud Run service's URL to switch it on (see server/README.md).
