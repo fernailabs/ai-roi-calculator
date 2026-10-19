@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-12T14:15:44.105Z",
+  "generatedAt": "2026-10-19T11:38:19.919Z",
   "source": "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json",
   "sourceProject": "BerriAI/litellm",
   "notes": "Prices are USD per 1M tokens, list price, no volume/committed-use discounts. Meta doesn't sell first-party per-token Llama API access, so its entries are priced via a third-party inference host (noted per model). Refreshed weekly by GitHub Actions from the source above — treat as indicative, not a live quote.",
