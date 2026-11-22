@@ -3,6 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # The weekly price refresh commits with GITHUB_TOKEN, and pushes made with
+  # that token don't trigger other workflows, so redeploy when it finishes.
+  workflow_run:
+    workflows: ["Refresh model prices"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
@@ -16,12 +22,16 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Latest main, so the price commit made by the refresh run is included.
+          ref: main
 
       - uses: actions/configure-pages@v5
 
