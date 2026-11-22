@@ -15,6 +15,9 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # deploy-pages finds the uploaded site through the Actions artifacts API;
+  # without read access that lookup can come back empty ("Found 0 artifact(s)").
+  actions: read
 
 concurrency:
   group: pages
