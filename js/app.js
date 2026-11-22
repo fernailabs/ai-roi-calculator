@@ -546,12 +546,22 @@
     els.role.addEventListener("change", () => { applyRole(els.role.value); render(); });
   }
 
+  // Plain-English note under the calculator: when prices were last updated,
+  // where they come from, and the currency caveat.
   function renderPriceSource() {
-    const generated = new Date(priceData.generatedAt);
-    els.priceSource.innerHTML =
-      `Pay-as-you-go prices are refreshed weekly from <a href="${priceData.source}" target="_blank" rel="noopener">${priceData.sourceProject}</a>, ` +
-      `last updated ${generated.toLocaleDateString(LOCALE, { year: "numeric", month: "long", day: "numeric" })}. ` +
-      `Seat prices are vendors' list prices, checked by hand. GBP figures use a fixed approximate exchange rate.`;
+    const updated = new Date(priceData.generatedAt)
+      .toLocaleDateString(LOCALE, { year: "numeric", month: "long", day: "numeric" });
+    const link = document.createElement("a");
+    link.href = `https://github.com/${priceData.sourceProject}`;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "LiteLLM's public price list";
+    els.priceSource.replaceChildren(
+      `Prices last updated ${updated}. Pay-as-you-go model prices are checked weekly against `,
+      link,
+      "; subscription prices are the providers' published list prices. " +
+        "Figures in pounds are converted from US dollars at a fixed, approximate rate."
+    );
   }
 
   async function init() {
