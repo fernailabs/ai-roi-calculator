@@ -15,6 +15,9 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # deploy-pages finds the uploaded site through the Actions artifacts API;
+  # without read access that lookup can come back empty ("Found 0 artifact(s)").
+  actions: read
 
 concurrency:
   group: pages
@@ -26,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment_retry.outputs.page_url || steps.deployment_final.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,5 +42,25 @@ jobs:
         with:
           path: .
 
+      # GitHub sometimes takes a few seconds to list an artifact that has just
+      # been uploaded, and deploy-pages fails at once with "No artifacts named
+      # github-pages were found" (seen on several runs in November 2026; a
+      # re-run always worked). So wait and try again, twice, before failing.
       - id: deployment
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - if: steps.deployment.outcome == 'failure'
+        run: sleep 30
+
+      - id: deployment_retry
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        run: sleep 90
+
+      - id: deployment_final
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
         uses: actions/deploy-pages@v5
